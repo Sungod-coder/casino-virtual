@@ -1,8 +1,21 @@
 // sounds.js
 // Gestion centralisée des sons du casino.
 
-const IS_IN_SUBFOLDER = /\/(roulette|machineasous|blackjack|baccarat|craps|videopoker)\//i.test(window.location.pathname);
-const SOUND_BASE = IS_IN_SUBFOLDER ? '../sons/' : 'sons/';
+// Détecte automatiquement le bon chemin vers le dossier "sons/"
+// en se basant sur le chemin réel du fichier sounds.js
+const SOUND_BASE = (function() {
+    try {
+        const current = document.currentScript;
+        if (current && current.src) {
+            // Ex: "https://site.com/.../sons/../sounds.js" ou "../sounds.js"
+            return current.src.replace(/sounds\.js(\?.*)?$/, 'sons/');
+        }
+    } catch (e) {}
+    // Fallback : ancienne logique
+    const path = window.location.pathname;
+    const sub = /\/(roulette|machineasous|blackjack|baccarat|craps|videopoker)\//i.test(path);
+    return sub ? '../sons/' : 'sons/';
+})();
 
 // ============================================================
 //   MUSIQUE D'AMBIANCE
