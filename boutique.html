@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique - Casino Virtual</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="battle-pass.css">
+    <link rel="stylesheet" href="no-select.css">
+    <style>
+        /* ====== OVERLAY OUVERTURE DE COFFRE ====== */
+        .chest-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(30, 10, 50, 0.98) 0%, rgba(0, 0, 0, 0.98) 100%);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            overflow: hidden;
+            animation: overlayFadeIn 0.4s ease;
+        }
+        .chest-overlay.visible { display: flex; }
+        @keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .chest-title {
+            color: #f1c40f;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(241, 196, 15, 0.8);
+            margin-bottom: 40px;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            animation: titlePulse 1.5s infinite;
+        }
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .chest-roller-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 1400px;
+            height: 220px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(30, 10, 50, 0.8) 50%, rgba(0,0,0,0.6) 100%);
+            border-top: 3px solid #f1c40f;
+            border-bottom: 3px solid #f1c40f;
+            box-shadow: 0 0 60px rgba(241, 196, 15, 0.4) inset;
+        }
+
+        .chest-roller-wrap::before,
+        .chest-roller-wrap::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .chest-roller-wrap::before {
+            left: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+        }
+        .chest-roller-wrap::after {
+            right: 0;
+            background: linear-gradient(270deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+        }
+
+        .chest-center-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, transparent, #f1c40f, #ff007a, #f1c40f, transparent);
+            transform: translateX(-50%);
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 1), 0 0 40px rgba(255, 0, 122, 0.6);
+            pointer-events: none;
+            animation: centerLineGlow 1s infinite;
+        }
+        @keyframes centerLineGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(241, 196, 15, 1), 0 0 40px rgba(255, 0, 122, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(241, 196, 15, 1), 0 0 60px rgba(255, 0, 122, 1); }
+        }
+
+        .chest-center-line::before,
+        .chest-center-line::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+        }
+        .chest-center-line::before {
+            top: -6px;
+            border-bottom: 15px solid #f1c40f;
+        }
+        .chest-center-line::after {
+            bottom: -6px;
+            border-top: 15px solid #f1c40f;
+        }
+
+        .chest-roller {
+            display: flex;
+            gap: 15px;
+            padding: 0 40px;
+            will-change: transform;
+            transition: transform 0s linear;
+        }
+
+        .chest-roll-item {
+            flex-shrink: 0;
+            width: 180px;
+            height: 160px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            border: 3px solid;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .chest-roll-icon {
+            font-size: 3rem;
+            line-height: 1;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+        }
+
+        .chest-roll-label {
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-align: center;
+            padding: 0 8px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 0.5px;
+        }
+
+        .chest-roll-item.common { background: linear-gradient(180deg, #2c3e50, #1a252f); border-color: #7f8c8d; }
+        .chest-roll-item.uncommon { background: linear-gradient(180deg, #1a4d2e, #0d2b1a); border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
+        .chest-roll-item.rare { background: linear-gradient(180deg, #1a3a5c, #0a1a2c); border-color: #3498db; box-shadow: 0 0 20px rgba(52, 152, 219, 0.5); }
+        .chest-roll-item.epic { background: linear-gradient(180deg, #4a1a5c, #2a0a3c); border-color: #9b59b6; box-shadow: 0 0 25px rgba(155, 89, 182, 0.6); }
+        .chest-roll-item.legendary { background: linear-gradient(180deg, #5c1a3a, #3c0a1a); border-color: #ff007a; box-shadow: 0 0 30px rgba(255, 0, 122, 0.7); }
+
+        .chest-roll-item.winner { animation: winnerGlow 0.5s infinite alternate; }
+        @keyframes winnerGlow {
+            from { box-shadow: 0 0 25px currentColor, 0 0 50px currentColor; }
+            to { box-shadow: 0 0 50px currentColor, 0 0 100px currentColor; transform: scale(1.05); }
+        }
+
+        .chest-result {
+            margin-top: 40px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.5s ease;
+            min-height: 80px;
+        }
+        .chest-result.visible { opacity: 1; transform: translateY(0); }
+
+        .chest-result-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .chest-result-text {
+            font-size: 1.1rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .chest-continue-btn {
+            margin-top: 30px;
+            background: linear-gradient(135deg, #f1c40f, #d35400);
+            color: #111;
+            border: none;
+            padding: 14px 50px;
+            border-radius: 30px;
+            font-weight: 900;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(241, 196, 15, 0.6);
+        }
+        .chest-continue-btn.visible { opacity: 1; pointer-events: auto; }
+        .chest-continue-btn:hover { transform: scale(1.05); box-shadow: 0 6px 30px rgba(241, 196, 15, 1); }
+
+        .chest-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            z-index: 15;
+            pointer-events: none;
+            opacity: 0;
+        }
+        .chest-shine.active { animation: shinePass 0.8s ease-out; }
+        @keyframes shinePass {
+            0% { left: -100%; opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .chest-title { font-size: 1.3rem; letter-spacing: 2px; margin-bottom: 25px; }
+            .chest-roller-wrap { height: 170px; }
+            .chest-roll-item { width: 140px; height: 130px; }
+            .chest-roll-icon { font-size: 2.2rem; }
+            .chest-roll-label { font-size: 0.65rem; }
+            .chest-roller-wrap::before, .chest-roller-wrap::after { width: 100px; }
+            .chest-result-title { font-size: 1.2rem; }
+            .chest-result-text { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lobby-container">
+        <header class="header-title">
+            <a href="index.html" class="btn-back-shop">← RETOUR AU LOBBY</a>
+            <h1>🛒 BOUTIQUE</h1>
+            <p>Achetez des bonus et objets exclusifs avec vos jetons</p>
+
+            <div class="global-balance-box">
+                <span class="label">SOLDE TOTAL :</span>
+                <span id="global-balance" class="value">0 €</span>
+                <button id="reset-balance-btn" class="btn-reload" style="display: none;">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <section class="shop-section shop-page">
+            <div class="shop-grid">
+                <div class="shop-card" data-item="potion-x2">
+                    <div class="shop-icon">🧪</div>
+                    <h3>Potion Chance x2</h3>
+                    <p class="shop-desc">Double vos chances de tomber sur un bon résultat.</p>
+                    <div class="shop-price">1000 <span class="coin">M</span></div>
+                    <button class="shop-btn" data-item="potion-x2" data-price="1000">ACHETER</button>
+                </div>
+
+                <div class="shop-card" data-item="potion-x5">
+                    <div class="shop-icon">⚗️</div>
+                    <h3>Potion Chance x5</h3>
+                    <p class="shop-desc">Multiplie vos chances de tomber sur un bon résultat.</p>
+                    <div class="shop-price">2500 <span class="coin">M</span></div>
+                    <button class="shop-btn" data-item="potion-x5" data-price="2500">ACHETER</button>
+                </div>
+
+                <div class="shop-card" data-item="mystery-chest">
+                    <div class="shop-icon">🎁</div>
+                    <h3>Coffre Mystère</h3>
+                    <p class="shop-desc">Ouvre un coffre et découvre une récompense surprise : jetons, potions, tickets… ou le MÉGA JACKPOT de 50 000 jetons !</p>
+                    <div class="shop-price">5000 <span class="coin">M</span></div>
+                    <button class="shop-btn" data-item="mystery-chest" data-price="5000">OUVRIR</button>
+                </div>
+
+                <div class="shop-card premium" data-item="battle-pass">
+                    <div class="shop-icon">👑</div>
+                    <h3>Pass Combat Premium</h3>
+                    <p class="shop-desc">Accès VIP : récompenses exclusives et bonus permanents.</p>
+                    <div class="shop-price">8000 <span class="coin">M</span></div>
+                    <button class="shop-btn" data-item="battle-pass" data-price="8000">ACHETER</button>
+                </div>
+            </div>
+
+            <div id="shop-message" class="shop-message"></div>
+        </section>
+    </div>
+
+    <!-- ====== OVERLAY OUVERTURE DE COFFRE ====== -->
+    <div id="chest-overlay" class="chest-overlay">
+        <div class="chest-title">🎁 Ouverture du Coffre...</div>
+
+        <div class="chest-roller-wrap">
+            <div class="chest-center-line"></div>
+            <div id="chest-roller" class="chest-roller"></div>
+            <div id="chest-shine" class="chest-shine"></div>
+        </div>
+
+        <div id="chest-result" class="chest-result">
+            <div id="chest-result-title" class="chest-result-title"></div>
+            <div id="chest-result-text" class="chest-result-text"></div>
+        </div>
+
+        <button id="chest-continue-btn" class="chest-continue-btn" onclick="closeChestOverlay()">SUPER !</button>
+    </div>
+
+    <script src="battle-pass.js"></script>
+    <script src="main.js"></script>
+    <script src="shop.js"></script>
+    <script src="sounds.js"></script>
+</body>
+</html>

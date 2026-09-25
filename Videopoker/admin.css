@@ -1,0 +1,194 @@
+/* ============================================
+   PANNEAU ADMIN
+   ============================================ */
+
+.admin-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+    border: 3px solid #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 99998;
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 8px 30px rgba(231, 76, 60, 1);
+}
+
+.admin-panel {
+    display: none;
+    position: fixed;
+    bottom: 85px;
+    right: 20px;
+    width: 340px;
+    max-width: calc(100vw - 40px);
+    max-height: 75vh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #1a0933, #0d0020);
+    border: 2px solid #f1c40f;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
+    z-index: 99999;
+    animation: adminAppear 0.25s ease-out;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+}
+
+.admin-panel.visible {
+    display: block;
+}
+
+@keyframes adminAppear {
+    0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #f1c40f;
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid rgba(241, 196, 15, 0.3);
+}
+
+.admin-close {
+    background: transparent;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.admin-close:hover {
+    background: rgba(231, 76, 60, 0.2);
+}
+
+.admin-section {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.admin-section:last-child {
+    border-bottom: none;
+}
+
+.admin-label {
+    font-size: 0.8rem;
+    color: #b39ddb;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.admin-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.admin-row button {
+    flex: 1;
+    min-width: 60px;
+    padding: 8px 10px;
+    background: linear-gradient(135deg, #f1c40f, #d35400);
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    font-family: inherit;
+}
+
+.admin-row button:hover {
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 4px 12px rgba(241, 196, 15, 0.5);
+}
+
+.admin-row button:active {
+    transform: scale(0.98);
+}
+
+.admin-row input {
+    flex: 1;
+    padding: 8px 10px;
+    background: #0d0f1b;
+    border: 2px solid #4a1570;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.8rem;
+    font-family: inherit;
+    min-width: 80px;
+}
+
+.admin-row input:focus {
+    outline: none;
+    border-color: #f1c40f;
+}
+
+.admin-toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    box-shadow: 0 8px 25px rgba(46, 204, 113, 0.6);
+    z-index: 99999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.admin-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .admin-panel {
+        width: calc(100vw - 24px);
+        right: 12px;
+        bottom: 80px;
+    }
+
+    .admin-btn {
+        width: 48px;
+        height: 48px;
+        bottom: 16px;
+        right: 16px;
+        font-size: 1.3rem;
+    }
+}

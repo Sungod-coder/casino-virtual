@@ -1,0 +1,944 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+.bp-body {
+    background: linear-gradient(180deg, #1a0933 0%, #240038 50%, #0d0020 100%);
+    background-attachment: fixed;
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bp-container {
+    width: 100%;
+    max-width: 1700px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================
+   BOUTON RETOUR
+   ============================================ */
+.bp-body .btn-back-shop {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #f1c40f;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.85rem;
+    border: 2px solid #f1c40f;
+    padding: 8px 16px;
+    border-radius: 30px;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
+    background: rgba(26, 9, 51, 0.6);
+    align-self: flex-start;
+}
+
+.bp-body .btn-back-shop:hover {
+    background-color: #f1c40f;
+    color: #111;
+    transform: translateX(-3px);
+}
+
+/* ============================================
+   HEADER SAISON
+   ============================================ */
+.bp-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0 0 22px;
+    padding: 22px;
+    background: linear-gradient(135deg, #2b0a4a, #1a0933);
+    border: 2px solid rgba(241, 196, 15, 0.4);
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(241, 196, 15, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    width: 100%;
+}
+
+.bp-season-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(13, 15, 27, 0.8);
+    padding: 10px 18px;
+    border-radius: 16px;
+    border: 2px solid #ff007a;
+    box-shadow: 0 4px 15px rgba(255, 0, 122, 0.3);
+}
+
+.bp-season-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 10px #ff007a);
+}
+
+.bp-season-label {
+    color: #ff66a3;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+}
+
+.bp-season-days {
+    color: #b39ddb;
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.bp-title {
+    color: #f1c40f;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    text-shadow: 0 0 25px rgba(241, 196, 15, 0.6);
+    flex-grow: 1;
+    text-align: center;
+    font-weight: 900;
+}
+
+.bp-balances {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.bp-balance-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(13, 15, 27, 0.8);
+    border: 2px solid #f1c40f;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(241, 196, 15, 0.15);
+}
+
+.bp-balance-item .label {
+    color: #b39ddb;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.bp-balance-item .value {
+    color: #f1c40f;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 900;
+}
+
+.bp-balance-item .value.tickets {
+    color: #ff66a3;
+}
+
+/* ============================================
+   PROGRESSION
+   ============================================ */
+.bp-progress-wrap {
+    background: linear-gradient(135deg, #1a0933, #2b0a4a);
+    border: 2px solid rgba(241, 196, 15, 0.4);
+    border-radius: 20px;
+    padding: 20px 25px;
+    margin-bottom: 22px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+}
+
+.bp-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bp-level-badge {
+    background: linear-gradient(135deg, #f1c40f, #d35400);
+    color: #111;
+    padding: 8px 18px;
+    border-radius: 24px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(241, 196, 15, 0.5);
+}
+
+.bp-xp-text {
+    color: #f1c40f;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+}
+
+.bp-progress-bar {
+    height: 22px;
+    background: #0d0f1b;
+    border-radius: 11px;
+    overflow: hidden;
+    border: 2px solid rgba(74, 21, 112, 0.8);
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.bp-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f1c40f, #ff8800, #ff007a);
+    width: 0%;
+    transition: width 0.6s ease;
+    border-radius: 11px;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.7) inset;
+}
+
+.bp-progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #b39ddb;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.bp-progress-info #bp-premium-status {
+    color: #888;
+    font-weight: bold;
+}
+
+.bp-progress-info #bp-premium-status.premium-active {
+    color: #ff66a3;
+    text-shadow: 0 0 10px rgba(255, 0, 122, 0.6);
+}
+
+/* ============================================
+   TRACK (style Brawl Stars)
+   ============================================ */
+.bp-scroll-container {
+    overflow-x: auto;
+    padding: 18px 0 25px;
+    background: linear-gradient(180deg, #150024 0%, #240038 100%);
+    border-radius: 22px;
+    border: 2px solid rgba(241, 196, 15, 0.4);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.bp-scroll-container::-webkit-scrollbar {
+    height: 10px;
+}
+.bp-scroll-container::-webkit-scrollbar-track {
+    background: #0d0f1b;
+    border-radius: 5px;
+    margin: 0 10px;
+}
+.bp-scroll-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #f1c40f, #ff007a);
+    border-radius: 5px;
+}
+
+.bp-track {
+    display: flex;
+    gap: 12px;
+    padding: 0 18px;
+    min-width: max-content;
+    align-items: center;
+    margin: 0 auto;
+}
+
+/* Labels Premium / Gratuit */
+.bp-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding-right: 14px;
+    padding-left: 8px;
+    border-right: 2px dashed rgba(74, 21, 112, 0.8);
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.bp-label {
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 0.8rem;
+    padding: 10px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.premium-label {
+    background: linear-gradient(135deg, #ff3399, #ff007a);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 0, 122, 0.6);
+    margin-top: 10px;
+}
+
+.free-label {
+    background: linear-gradient(135deg, #f1c40f, #ffaa00);
+    color: #111;
+    box-shadow: 0 4px 15px rgba(241, 196, 15, 0.6);
+}
+
+/* Grille de colonnes */
+.bp-grid {
+    display: flex;
+    gap: 10px;
+    padding-bottom: 5px;
+}
+
+.bp-column {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 95px;
+    position: relative;
+}
+
+.bp-column.locked .bp-slot {
+    opacity: 0.45;
+    filter: grayscale(60%);
+}
+
+.bp-column.unlocked .bp-slot.free-slot {
+    opacity: 1;
+    filter: none;
+}
+
+/* Slot */
+.bp-slot {
+    background: #0d0f1b;
+    border: 2px solid #4a1570;
+    border-radius: 12px;
+    height: 95px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.bp-slot-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+    width: 100%;
+    height: 100%;
+}
+
+.bp-slot.premium-slot {
+    background: linear-gradient(135deg, #2b0a3d, #4a0a52);
+    border-color: #ff007a;
+}
+
+.bp-slot.free-slot {
+    background: linear-gradient(135deg, #1a1a1a, #2b2b2b);
+    border-color: #f1c40f;
+}
+
+.bp-slot.claimable {
+    cursor: pointer;
+    animation: bpPulse 1.8s infinite;
+}
+
+.bp-slot.claimable:hover {
+    transform: scale(1.06);
+    z-index: 5;
+}
+
+@keyframes bpPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(241, 196, 15, 0.6); }
+    50% { box-shadow: 0 0 20px rgba(241, 196, 15, 1); }
+}
+
+.bp-slot.premium-slot.claimable {
+    animation: bpPulsePink 1.8s infinite;
+}
+
+@keyframes bpPulsePink {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 0, 122, 0.6); }
+    50% { box-shadow: 0 0 20px rgba(255, 0, 122, 1); }
+}
+
+.bp-slot.claimed {
+    opacity: 0.45;
+    background: #1a3a1a;
+    border-color: #2ecc71;
+}
+
+.bp-slot.locked {
+    cursor: not-allowed;
+}
+
+.bp-slot-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.bp-slot-text {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #f1c40f;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.premium-slot .bp-slot-text {
+    color: #ff66a3;
+}
+
+.bp-slot-check {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    color: #2ecc71;
+    font-weight: 900;
+    font-size: 1.1rem;
+    text-shadow: 0 0 6px #2ecc71;
+    z-index: 2;
+}
+
+.bp-slot-lock {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 0.85rem;
+    z-index: 2;
+}
+
+/* Numéro de niveau */
+.bp-column-level {
+    background: linear-gradient(135deg, #f1c40f, #d35400);
+    color: #111;
+    font-weight: 900;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 4px 0;
+    border-radius: 8px;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(241, 196, 15, 0.4);
+    position: relative;
+    z-index: 3;
+}
+
+.bp-column.current .bp-column-level {
+    background: linear-gradient(135deg, #ff3399, #ff007a);
+    color: #fff;
+    animation: currentPulse 1.5s infinite;
+}
+
+@keyframes currentPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+.bp-column.unlocked .bp-column-level {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+}
+
+/* Coin dans les slots */
+.bp-slot-text .coin,
+.bp-slot-text .coin.small {
+    width: 14px;
+    height: 14px;
+    font-size: 0.55rem;
+    border-width: 1px;
+    margin-left: 2px;
+    margin-right: 0;
+    vertical-align: middle;
+}
+
+.bp-slot-content .bp-slot-text:only-child,
+.bp-slot-content .bp-slot-text:first-child:last-child {
+    margin-top: 0;
+}
+
+.bp-slot-content .bp-slot-text .coin {
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    border-width: 1.5px;
+    margin-left: 3px;
+}
+
+/* ============================================
+   MESSAGES
+   ============================================ */
+.bp-message {
+    text-align: center;
+    margin-top: 18px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    min-height: 24px;
+}
+
+.bp-message.success { color: #2ecc71; }
+.bp-message.error { color: #e74c3c; }
+
+/* ============================================
+   POPUPS
+   ============================================ */
+.xp-popup {
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    background: linear-gradient(135deg, #f1c40f, #ff8800);
+    color: #111;
+    font-weight: 900;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 1.05rem;
+    box-shadow: 0 6px 20px rgba(241, 196, 15, 0.6);
+    z-index: 99999;
+    animation: xpFloat 2s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes xpFloat {
+    0% { opacity: 0; transform: translateY(20px) scale(0.8); }
+    20% { opacity: 1; transform: translateY(0) scale(1.1); }
+    70% { opacity: 1; transform: translateY(-10px) scale(1); }
+    100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
+}
+
+.levelup-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #f1c40f, #ff007a);
+    color: #fff;
+    padding: 28px 45px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(241, 196, 15, 0.8);
+    z-index: 99999;
+    animation: levelupPop 0.5s ease-out;
+    transition: opacity 0.5s ease;
+}
+
+.levelup-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    margin-bottom: 8px;
+}
+
+.levelup-sub {
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+@keyframes levelupPop {
+    0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+    60% { transform: translate(-50%, -50%) scale(1.15); }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* ============================================
+   TICKETS
+   ============================================ */
+.tickets-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0d0f1b;
+    border: 2px solid #ff007a;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: #ff66a3;
+    font-size: 0.9rem;
+    margin-left: 12px;
+}
+
+.tickets-icon { font-size: 1.05rem; }
+.tickets-value { color: #ff66a3; font-weight: 900; }
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 900px) {
+    .bp-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 18px;
+        gap: 14px;
+    }
+
+    .bp-title {
+        font-size: 1.6rem;
+        letter-spacing: 2px;
+        order: -1;
+        width: 100%;
+    }
+
+    .bp-balances {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .bp-progress-wrap {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .bp-level-badge {
+        font-size: 0.82rem;
+        padding: 6px 14px;
+    }
+
+    .bp-xp-text {
+        font-size: 1rem;
+    }
+
+    .bp-progress-bar {
+        height: 18px;
+    }
+
+    .bp-column {
+        min-width: 82px;
+    }
+
+    .bp-slot {
+        height: 85px;
+        border-radius: 10px;
+    }
+
+    .bp-slot-icon {
+        font-size: 1.4rem;
+    }
+
+    .bp-slot-text {
+        font-size: 0.7rem;
+    }
+
+    .bp-column-level {
+        font-size: 0.75rem;
+        padding: 3px 0;
+    }
+
+    .bp-label {
+        font-size: 0.72rem;
+        padding: 8px 12px;
+    }
+
+    .bp-labels {
+        gap: 28px;
+    }
+}
+
+@media (max-width: 600px) {
+    .bp-body {
+        padding: 12px 10px 40px;
+    }
+
+    .bp-body .btn-back-shop {
+        font-size: 0.78rem;
+        padding: 6px 14px;
+        margin-bottom: 12px;
+    }
+
+    .bp-header {
+        padding: 14px;
+        border-radius: 18px;
+        margin-bottom: 14px;
+    }
+
+    .bp-title {
+        font-size: 1.25rem;
+        letter-spacing: 1.5px;
+    }
+
+    .bp-season-badge {
+        padding: 8px 12px;
+    }
+
+    .bp-season-icon {
+        font-size: 1.5rem;
+    }
+
+    .bp-season-label {
+        font-size: 0.72rem;
+        letter-spacing: 1.5px;
+    }
+
+    .bp-season-days {
+        font-size: 0.65rem;
+    }
+
+    .bp-balance-item {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        gap: 5px;
+    }
+
+    .bp-balance-item .label {
+        font-size: 0.65rem;
+    }
+
+    .bp-balance-item .value {
+        font-size: 0.85rem;
+    }
+
+    .bp-progress-wrap {
+        padding: 12px;
+        border-radius: 14px;
+        margin-bottom: 14px;
+    }
+
+    .bp-progress-header {
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+    }
+
+    .bp-level-badge {
+        font-size: 0.75rem;
+        padding: 5px 12px;
+    }
+
+    .bp-xp-text {
+        font-size: 0.9rem;
+    }
+
+    .bp-progress-bar {
+        height: 16px;
+        margin-bottom: 8px;
+    }
+
+    .bp-progress-info {
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+        font-size: 0.72rem;
+    }
+
+    .bp-scroll-container {
+        padding: 12px 0 18px;
+        border-radius: 16px;
+    }
+
+    .bp-track {
+        padding: 0 12px;
+        gap: 8px;
+    }
+
+    .bp-column {
+        min-width: 68px;
+        gap: 4px;
+    }
+
+    .bp-slot {
+        height: 72px;
+        border-radius: 8px;
+    }
+
+    .bp-slot-content {
+        padding: 4px;
+        gap: 2px;
+    }
+
+    .bp-slot-icon {
+        font-size: 1.1rem;
+    }
+
+    .bp-slot-text {
+        font-size: 0.6rem;
+    }
+
+    .bp-slot-text .coin,
+    .bp-slot-text .coin.small {
+        width: 11px;
+        height: 11px;
+        font-size: 0.45rem;
+    }
+
+    .bp-slot-content .bp-slot-text .coin {
+        width: 13px;
+        height: 13px;
+        font-size: 0.55rem;
+    }
+
+    .bp-column-level {
+        font-size: 0.65rem;
+        padding: 2px 0;
+        border-radius: 6px;
+    }
+
+    .bp-label {
+        font-size: 0.6rem;
+        padding: 6px 10px;
+        letter-spacing: 1px;
+    }
+
+    .bp-labels {
+        gap: 22px;
+        padding-right: 10px;
+    }
+
+    .levelup-popup {
+        padding: 20px 25px;
+        margin: 0 15px;
+    }
+
+    .levelup-title {
+        font-size: 1.15rem;
+    }
+
+    .levelup-sub {
+        font-size: 0.78rem;
+    }
+
+    .xp-popup {
+        top: 60px;
+        right: 12px;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+
+    .tickets-box {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 400px) {
+    .bp-title {
+        font-size: 1.05rem;
+    }
+
+    .bp-column {
+        min-width: 60px;
+    }
+
+    .bp-slot {
+        height: 66px;
+    }
+
+    .bp-slot-icon {
+        font-size: 1rem;
+    }
+
+    .bp-slot-text {
+        font-size: 0.55rem;
+    }
+
+    .bp-label {
+        font-size: 0.55rem;
+        padding: 5px 8px;
+    }
+}
+
+/* ============================================
+   OVERLAY + POPUP RANK UP — Chargé PARTOUT
+   (jeux, lobby, boutique, battle-pass)
+   ============================================ */
+
+.rankup-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: radial-gradient(circle at center, rgba(30, 10, 50, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%) !important;
+    z-index: 2147483646 !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.rankup-overlay.visible {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.rankup-popup {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(0.3);
+    background: linear-gradient(135deg, #1a0933, #2b0a4a) !important;
+    border: 3px solid #f1c40f !important;
+    border-radius: 24px !important;
+    padding: 30px 50px !important;
+    text-align: center !important;
+    z-index: 2147483647 !important;
+    box-shadow: 0 0 80px rgba(241, 196, 15, 0.9), 0 0 120px rgba(241, 196, 15, 0.5) !important;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.5, 0, 0.3, 1.4);
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 14px !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.rankup-popup.show {
+    opacity: 1 !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+    animation: rankupShine 1.5s ease-in-out infinite alternate;
+}
+
+.rankup-popup.fade-out {
+    opacity: 0 !important;
+    transform: translate(-50%, -50%) scale(0.9) !important;
+}
+
+.rankup-popup .rankup-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rankup-popup .rankup-title {
+    font-size: 1.2rem !important;
+    color: #f1c40f !important;
+    letter-spacing: 3px !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+}
+
+.rankup-popup .rankup-name {
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 3px !important;
+    text-shadow: 0 0 20px currentColor;
+}
+
+@keyframes rankupShine {
+    from { box-shadow: 0 0 60px rgba(241, 196, 15, 0.8), 0 0 100px rgba(241, 196, 15, 0.4); }
+    to   { box-shadow: 0 0 100px rgba(241, 196, 15, 1), 0 0 160px rgba(255, 0, 122, 0.7); }
+}
+
+@media (max-width: 600px) {
+    .rankup-popup {
+        padding: 22px 28px !important;
+        margin: 0 15px !important;
+        max-width: calc(100vw - 30px) !important;
+    }
+    .rankup-popup .rankup-title { font-size: 1rem !important; letter-spacing: 2px !important; }
+    .rankup-popup .rankup-name { font-size: 1.4rem !important; letter-spacing: 2px !important; }
+}

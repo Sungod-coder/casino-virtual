@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craps - Casino Virtual</title>
+    <link rel="stylesheet" href="craps.css">
+    <link rel="stylesheet" href="../info-bubble.css">
+    <link rel="stylesheet" href="../battle-pass.css">
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="../no-select.css">
+</head>
+<body data-game="craps">
+    <div class="app-container">
+        <header>
+            <a href="../index.html" class="btn-back">← RETOUR AU LOBBY</a>
+            <div class="logo-title">
+                <h1>CRAPS (DÉS)</h1>
+                <div class="subtitle">QUEL EST VOTRE POINT ?</div>
+            </div>
+            <div class="balance-container">
+                <div class="balance-box">
+                    <span class="label">SOLDE VIRTUEL</span>
+                    <span id="balance-val" class="value">0 €</span>
+                </div>
+                <button id="reload-btn" class="btn-reload" style="display: none;">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <main class="game-layout">
+            <div class="craps-board-section">
+                <div class="dice-display-area">
+                    <div id="dice-1" class="die">🎲</div>
+                    <div id="dice-2" class="die">🎲</div>
+                </div>
+                <div id="dice-sum" class="dice-sum-text">Somme : -</div>
+
+                <div class="table-info-box">
+                    <div class="info-row"><span>Phase actuelle :</span> <strong id="game-phase">Lancer de Sortie (Come Out)</strong></div>
+                    <div class="info-row"><span>Point à établir :</span> <strong id="point-display">Aucun</strong></div>
+                </div>
+
+                <div class="rules-summary">
+                    <p>🎯 <strong>Règles Pass Line :</strong> Sortez 7 ou 11 pour gagner direct. 2, 3 ou 12 = Perdu. Tout autre nombre devient votre <strong>Point</strong> : vous devez le refaire avant de faire un 7.</p>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>1. CHOISISSEZ LA MISE (JETONS)</h3>
+                    <div class="chip-selector">
+                        <button class="chip active" data-value="5">5</button>
+                        <button class="chip" data-value="10">10</button>
+                        <button class="chip" data-value="25">25</button>
+                        <button class="chip" data-value="50">50</button>
+                    </div>
+                    <div class="bet-info">Mise Pass Line : <span id="current-bet-display">0 €</span></div>
+                </div>
+
+                <div class="control-section">
+                    <h3>2. ACTIONS</h3>
+                    <button id="cancel-bet-btn" class="action-btn cancel-bet-btn">↩️ ANNULER LA MISE</button>
+                    <button id="roll-btn" class="action-btn roll-btn">🎲 LANCER LES DÉS</button>
+                    <button id="ticket-btn" class="ticket-btn">🎫 JOUER AVEC UN TICKET (<span class="ticket-count">0</span>)</button>
+                </div>
+
+                <div id="message-box" class="message-box">Placez une mise et lancez les dés pour démarrer !</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../battle-pass.js"></script>
+    <script src="../rank.js"></script>
+    <script src="../potion.js"></script>
+    <script src="../sounds.js"></script>
+    <script src="../info-bubble.js"></script>
+    <script src="craps.js"></script>
+</body>
+</html>

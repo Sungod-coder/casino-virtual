@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pass de Combat - Casino Virtual</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="battle-pass.css">
+    <link rel="stylesheet" href="no-select.css">
+</head>
+<body class="bp-body">
+
+    <div class="bp-container">
+        <a href="index.html" class="btn-back-shop">← RETOUR AU LOBBY</a>
+
+        <header class="bp-header">
+            <div class="bp-season-badge">
+                <span class="bp-season-icon">🎰</span>
+                <div>
+                    <div class="bp-season-label">SAISON 1</div>
+                    <div class="bp-season-days"><span id="bp-days-remaining">21</span> jours restants</div>
+                </div>
+            </div>
+
+            <h1 class="bp-title">PASS DE COMBAT</h1>
+
+            <div class="bp-balances">
+                <div class="bp-balance-item">
+                    <span class="label">SOLDE :</span>
+                    <span id="bp-balance-val" class="value">0 €</span>
+                </div>
+                <div class="bp-balance-item">
+                    <span class="label">🎫 TICKETS :</span>
+                    <span id="bp-tickets-val" class="value tickets">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="bp-progress-wrap">
+            <div class="bp-progress-header">
+                <span class="bp-level-badge">NIVEAU <strong id="bp-current-level">1</strong> / 50</span>
+                <span class="bp-xp-text"><span id="bp-current-xp">0</span> XP</span>
+            </div>
+            <div class="bp-progress-bar">
+                <div id="bp-progress-fill" class="bp-progress-fill"></div>
+            </div>
+            <div class="bp-progress-info">
+                <span id="bp-xp-to-next">50 XP pour le niveau suivant</span>
+                <span id="bp-premium-status">Pass Gratuit</span>
+            </div>
+        </div>
+
+        <div class="bp-scroll-container">
+            <div class="bp-track">
+                <div class="bp-labels">
+                    <div class="bp-label premium-label">👑 PREMIUM</div>
+                    <div class="bp-label free-label">🎁 GRATUIT</div>
+                </div>
+                <div id="bp-grid" class="bp-grid"></div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:30px;">
+            <button onclick="bpForceNewSeason()" style="
+                background: #e74c3c;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 12px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 0.9rem;
+                box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
+            ">
+                🔄 RÉINITIALISER LA SAISON (debug)
+            </button>
+        </div>
+    </div>
+
+    <script src="battle-pass.js"></script>
+    <script src="main.js"></script>
+    <script src="battle-pass-page.js"></script>
+    <script src="sounds.js"></script>
+</body>
+</html>

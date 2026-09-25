@@ -1,0 +1,419 @@
+/* ============================================
+   STYLES COMMUNS (coin, potion, tickets)
+   À charger dans TOUTES les pages
+   ============================================ */
+
+/* COIN DORÉ AVEC M */
+.coin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffe98a 0%, #f1c40f 45%, #b8860b 100%);
+    color: #4a2c00;
+    font-weight: 900;
+    font-size: 0.85rem;
+    line-height: 1;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    border: 2px solid #ffd700;
+    box-shadow:
+        inset 0 0 3px rgba(255, 255, 255, 0.7),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+        0 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    margin-left: 5px;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.coin.small {
+    width: 16px;
+    height: 16px;
+    font-size: 0.65rem;
+    border-width: 1.5px;
+    margin: 0 3px;
+}
+
+.coin.large {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
+    border-width: 2.5px;
+}
+
+/* TICKETS */
+.tickets-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0d0f1b;
+    border: 2px solid #ff007a;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: #ff66a3;
+    font-size: 0.9rem;
+    margin-left: 10px;
+}
+
+.tickets-icon { font-size: 1.05rem; }
+.tickets-value { color: #ff66a3; font-weight: 900; }
+
+/* ============================================
+   BOUTON TICKET (corrigé)
+   ============================================ */
+.ticket-btn {
+    display: flex !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #ff3399, #ff007a);
+    color: #fff;
+    border: 2px solid #ff66a3;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(255, 0, 122, 0.5);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    align-self: stretch;
+}
+
+.ticket-btn:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 6px 25px rgba(255, 0, 122, 0.9);
+}
+
+.ticket-btn:disabled {
+    background: #444 !important;
+    color: #888 !important;
+    border-color: #555 !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    opacity: 1;
+}
+
+.ticket-btn .ticket-count {
+    background: #fff;
+    color: #ff007a;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.ticket-btn:disabled .ticket-count {
+    background: #666;
+    color: #ddd;
+}
+
+/* ============================================
+   SYSTÈME DE POTIONS
+   ============================================ */
+.potion-wrapper {
+    display: inline-block;
+    position: relative;
+    margin-left: 12px;
+    vertical-align: middle;
+}
+
+.potion-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 10px 16px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+    font-family: inherit;
+}
+
+.potion-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(243, 156, 18, 0.8);
+}
+
+.potion-btn.active {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    animation: potionGlow 1.5s infinite;
+}
+
+@keyframes potionGlow {
+    0%, 100% { box-shadow: 0 4px 15px rgba(46, 204, 113, 0.6); }
+    50% { box-shadow: 0 4px 25px rgba(46, 204, 113, 1); }
+}
+
+.potion-icon { font-size: 1.15rem; }
+
+.potion-count {
+    background: #fff;
+    color: #e67e22;
+    padding: 2px 9px;
+    border-radius: 15px;
+    font-weight: 900;
+    font-size: 0.8rem;
+    min-width: 24px;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.potion-btn.active .potion-count { display: none; }
+
+.potion-timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.potion-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 380px;
+    max-width: 92vw;
+    background: linear-gradient(180deg, #2b0a4a, #1a0933);
+    border: 2px solid #f1c40f;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+    z-index: 2000;
+    animation: potionPanelAppear 0.25s ease-out;
+}
+
+.potion-panel.visible { display: block; }
+
+@keyframes potionPanelAppear {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.potion-active-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.1));
+    border: 2px solid #2ecc71;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
+.potion-active-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 10px #2ecc71);
+}
+
+.potion-active-title {
+    color: #2ecc71;
+    font-weight: 900;
+    font-size: 0.92rem;
+}
+
+.potion-active-timer {
+    color: #b39ddb;
+    font-size: 0.82rem;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+}
+
+.potion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(13, 15, 27, 0.7);
+    border: 2px solid #4a1570;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.potion-item-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.5));
+}
+
+.potion-item-info {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.potion-item-name {
+    color: #f1c40f;
+    font-weight: 900;
+    font-size: 0.88rem;
+}
+
+.potion-item-desc {
+    color: #b39ddb;
+    font-size: 0.72rem;
+    margin-top: 2px;
+}
+
+.potion-item-count {
+    color: #ff66a3;
+    font-weight: 900;
+    font-size: 0.82rem;
+    margin-top: 4px;
+}
+
+.potion-use-btn {
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #f1c40f, #d35400);
+    color: #111;
+    border: none;
+    border-radius: 10px;
+    font-weight: 900;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.potion-use-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(241, 196, 15, 0.6);
+}
+
+.potion-use-btn:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.potion-hint {
+    color: #888;
+    font-size: 0.72rem;
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.potion-message {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-30px);
+    background: linear-gradient(135deg, #f1c40f, #d35400);
+    color: #111;
+    padding: 14px 26px;
+    border-radius: 30px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 25px rgba(241, 196, 15, 0.6);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    max-width: 90vw;
+    text-align: center;
+}
+
+.potion-message.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.potion-floating-indicator {
+    position: fixed;
+    top: 75px;
+    right: 20px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 25px rgba(46, 204, 113, 0.6);
+    z-index: 9999;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-variant-numeric: tabular-nums;
+    animation: potionGlow 1.5s infinite;
+}
+
+.potion-ind-mult {
+    background: #fff;
+    color: #2ecc71;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.potion-ind-timer { font-size: 0.9rem; }
+
+@media (max-width: 768px) {
+    .potion-btn {
+        padding: 8px 12px;
+        font-size: 0.82rem;
+    }
+
+    .potion-panel { width: 340px; }
+
+    .potion-floating-indicator {
+        top: 68px;
+        right: 12px;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .potion-wrapper {
+        margin-left: 8px;
+        margin-top: 8px;
+        display: block;
+    }
+
+    .potion-btn {
+        padding: 8px 12px;
+        font-size: 0.78rem;
+    }
+
+    .potion-panel {
+        width: calc(100vw - 24px);
+        left: 50%;
+        padding: 14px;
+    }
+
+    .potion-item {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .potion-item-icon { font-size: 1.6rem; }
+
+    .potion-use-btn {
+        padding: 6px 10px;
+        font-size: 0.68rem;
+    }
+
+    .potion-floating-indicator {
+        top: 62px;
+        right: 8px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+    }
+}

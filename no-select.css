@@ -1,0 +1,46 @@
+/* ============================================
+   ANTI-SÉLECTION DE TEXTE
+   À charger dans TOUTES les pages HTML
+   ============================================ */
+
+* {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Autorise la saisie uniquement dans les champs */
+input,
+textarea,
+[contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    cursor: text;
+}
+
+/* Curseur main pour les éléments cliquables */
+a,
+button,
+.game-btn,
+.shop-btn,
+.chip,
+.bet-spot,
+.action-btn,
+.btn,
+.ticket-btn,
+.ticket-count,
+.home-link,
+.profile-link,
+.shop-link,
+.bp-link,
+.chip,
+.die,
+.card-slot,
+.bp-slot.claimable,
+[role="button"],
+[onclick] {
+    cursor: pointer;
+}

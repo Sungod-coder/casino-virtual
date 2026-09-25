@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack - Casino Virtual</title>
+    <link rel="stylesheet" href="blackjack.css">
+    <link rel="stylesheet" href="../info-bubble.css">
+    <link rel="stylesheet" href="../battle-pass.css">
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="../no-select.css">
+</head>
+<body data-game="blackjack">
+    <div class="app-container">
+        <header>
+            <a href="../index.html" class="btn-back">← RETOUR AU LOBBY</a>
+            <div class="logo-title">
+                <h1>BLACKJACK</h1>
+                <div class="subtitle">ATTEIGNEZ 21 SANS DÉPASSER</div>
+            </div>
+            <div class="balance-container">
+                <div class="balance-box">
+                    <span class="label">SOLDE VIRTUEL</span>
+                    <span id="balance-val" class="value">0 €</span>
+                </div>
+                <button id="reload-btn" class="btn-reload" style="display: none;">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <main class="game-layout">
+            <div class="table-section">
+                <div class="hand-zone">
+                    <h3>LE CROUPIER <span id="dealer-score" class="score">0</span></h3>
+                    <div id="dealer-hand" class="hand"></div>
+                </div>
+                <div class="table-info-box">
+                    <div id="game-status" class="status-text">Placez votre mise pour commencer</div>
+                </div>
+                <div class="hand-zone">
+                    <h3>VOUS <span id="player-score" class="score">0</span></h3>
+                    <div id="player-hand" class="hand"></div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div id="betting-panel" class="control-section">
+                    <h3>1. CHOISISSEZ VOTRE MISE</h3>
+                    <div class="chip-selector">
+                        <button class="chip active" data-value="5">5</button>
+                        <button class="chip" data-value="10">10</button>
+                        <button class="chip" data-value="25">25</button>
+                        <button class="chip" data-value="50">50</button>
+                        <button class="chip" data-value="100">100</button>
+                    </div>
+                    <div class="bet-info">Mise actuelle : <span id="current-bet-display">0 €</span></div>
+                    <button id="deal-btn" class="action-btn deal-btn">🎴 DISTRIBUER</button>
+                    <button id="ticket-btn" class="ticket-btn">🎫 JOUER AVEC UN TICKET (<span class="ticket-count">0</span>)</button>
+                </div>
+
+                <div id="action-panel" class="control-section hidden">
+                    <h3>2. ACTIONS</h3>
+                    <button id="hit-btn" class="action-btn hit-btn">🃏 TIRER UNE CARTE</button>
+                    <button id="stand-btn" class="action-btn stand-btn">✋ RESTER</button>
+                </div>
+
+                <div id="message-box" class="message-box">Bienvenue au Blackjack !</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../battle-pass.js"></script>
+    <script src="../rank.js"></script>
+    <script src="../potion.js"></script>
+    <script src="../sounds.js"></script>
+    <script src="../info-bubble.js"></script>
+    <script src="blackjack.js"></script>
+</body>
+</html>

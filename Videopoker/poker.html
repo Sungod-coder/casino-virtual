@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Poker - Casino Virtual</title>
+    <link rel="stylesheet" href="poker.css">
+    <link rel="stylesheet" href="../info-bubble.css">
+    <link rel="stylesheet" href="../battle-pass.css">
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="../no-select.css">
+</head>
+<body data-game="poker">
+    <div class="app-container">
+        <header>
+            <a href="../index.html" class="btn-back">← RETOUR AU LOBBY</a>
+            <div class="logo-title">
+                <h1>VIDEO POKER</h1>
+                <div class="subtitle">JACKS OR BETTER</div>
+            </div>
+            <div class="balance-container">
+                <div class="balance-box">
+                    <span class="label">SOLDE VIRTUEL</span>
+                    <span id="balance-val" class="value">0 €</span>
+                </div>
+                <button id="reload-btn" class="btn-reload" style="display: none;">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <main class="game-horizontal">
+            <section class="cards-section">
+                <div id="cards-zone" class="cards-zone">
+                    <div class="card-slot empty" data-index="0"></div>
+                    <div class="card-slot empty" data-index="1"></div>
+                    <div class="card-slot empty" data-index="2"></div>
+                    <div class="card-slot empty" data-index="3"></div>
+                    <div class="card-slot empty" data-index="4"></div>
+                </div>
+                <div class="table-info-box">
+                    <div id="game-status" class="status-text">Placez votre mise pour commencer</div>
+                </div>
+            </section>
+
+            <section class="controls-section">
+                <div id="betting-panel" class="control-section">
+                    <h3>1. CHOISISSEZ VOTRE MISE</h3>
+                    <div class="chip-selector">
+                        <button class="chip active" data-value="5">5</button>
+                        <button class="chip" data-value="10">10</button>
+                        <button class="chip" data-value="25">25</button>
+                        <button class="chip" data-value="50">50</button>
+                        <button class="chip" data-value="100">100</button>
+                    </div>
+                    <div class="bet-info">Mise actuelle : <span id="current-bet-display">0 €</span></div>
+                    <button id="deal-btn" class="action-btn deal-btn" disabled>🎴 DISTRIBUER</button>
+                    <button id="ticket-btn" class="ticket-btn">🎫 JOUER AVEC UN TICKET (<span class="ticket-count">0</span>)</button>
+                </div>
+
+                <div id="action-panel" class="control-section hidden">
+                    <h3>2. ACTIONS</h3>
+                    <p class="hint">Cliquez sur les cartes à GARDER, puis échangez les autres.</p>
+                    <button id="draw-btn" class="action-btn draw-btn">🔄 ÉCHANGER LES CARTES</button>
+                </div>
+
+                <div class="paytable">
+                    <h4>TABLE DES GAINS</h4>
+                    <div class="paytable-grid">
+                        <div class="payout-item"><span>Quinte Flush Royale</span><strong>250x</strong></div>
+                        <div class="payout-item"><span>Quinte Flush</span><strong>50x</strong></div>
+                        <div class="payout-item"><span>Carré</span><strong>25x</strong></div>
+                        <div class="payout-item"><span>Full House</span><strong>9x</strong></div>
+                        <div class="payout-item"><span>Couleur</span><strong>6x</strong></div>
+                        <div class="payout-item"><span>Quinte</span><strong>4x</strong></div>
+                        <div class="payout-item"><span>Brelan</span><strong>3x</strong></div>
+                        <div class="payout-item"><span>Deux Paires</span><strong>2x</strong></div>
+                        <div class="payout-item"><span>Paire de J/Q/K/A</span><strong>1x</strong></div>
+                    </div>
+                </div>
+            </section>
+
+            <div id="message-box" class="message-box">Choisissez une mise et cliquez sur DISTRIBUER !</div>
+        </main>
+    </div>
+
+    <script src="../battle-pass.js"></script>
+    <script src="../rank.js"></script>
+    <script src="../potion.js"></script>
+    <script src="../sounds.js"></script>
+    <script src="../info-bubble.js"></script>
+    <script src="poker.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Casino Virtual</title>
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="no-select.css">
+</head>
+<body>
+
+    <div class="auth-card">
+        <a href="index.html" class="btn-back">← Retour au Lobby</a>
+        
+        <h2>INSCRIPTION</h2>
+
+        <form id="register-form">
+            <div class="input-group">
+                <label for="email">Adresse mail</label>
+                <input type="email" id="email" placeholder="votre@email.com" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="Mot de passe" required>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirmer le mot de passe</label>
+                <input type="password" id="confirm-password" placeholder="Répétez le mot de passe" required>
+            </div>
+
+            <button type="submit" class="btn-submit">S'INSCRIRE</button>
+        </form>
+
+        <div id="pseudo-section" class="hidden">
+            <h3>CHOISISSEZ VOTRE PSEUDO</h3>
+            <div class="input-group">
+                <label for="pseudo-input">Votre Pseudo unique</label>
+                <input type="text" id="pseudo-input" placeholder="Ex: LuckyPlayer" required>
+            </div>
+            <button id="save-pseudo-btn" class="btn-submit">CONFIRMER LE PSEUDO</button>
+        </div>
+
+        <p id="error-message" class="message"></p>
+
+        <div class="auth-footer" id="footer-links">
+            <span>Déjà un compte ?</span>
+            <a href="connexion.html" class="auth-link">Se connecter</a>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="sounds.js"></script>
+</body>
+</html>

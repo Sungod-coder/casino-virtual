@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette des Couleurs - Quitte ou Double</title>
+    <link rel="stylesheet" href="roulette.css">
+    <link rel="stylesheet" href="../info-bubble.css">
+    <link rel="stylesheet" href="../battle-pass.css">
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="../no-select.css">
+</head>
+<body data-game="roulette">
+    <div id="game-container">
+        <header>
+            <a href="../index.html" class="btn-back">← RETOUR AU LOBBY</a>
+            <div class="logo-title">
+                <h1>Roulette Couleurs</h1>
+                <div class="subtitle">QUITTE OU DOUBLE</div>
+            </div>
+            <div class="balance-container">
+                <div class="balance-box">
+                    <span class="label">SOLDE VIRTUEL</span>
+                    <span id="balance-val" class="value">1000 €</span>
+                </div>
+                <button id="reload-btn" class="btn-reload hidden">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="wheel-section">
+                <div class="wheel-wrapper">
+                    <canvas id="wheel-canvas" width="500" height="500"></canvas>
+                </div>
+                <div class="history-container">
+                    <span class="history-title">DERNIERS TIRAGES :</span>
+                    <div id="history-list" class="history-list"></div>
+                </div>
+            </section>
+
+            <section class="controls-section">
+                <div id="streak-panel" class="streak-panel hidden">
+                    <div class="streak-header">
+                        <h2>SÉRIE EN COURS !</h2>
+                        <span id="streak-count" class="streak-badge">1 Victoire</span>
+                    </div>
+                    <div class="streak-data">
+                        <div class="data-item"><span class="data-label">Gain Accumulé</span><span id="current-gain" class="data-value highlight">0 €</span></div>
+                        <div class="data-item"><span class="data-label">Prochain Gain Possible</span><span id="next-gain" class="data-value next">0 €</span></div>
+                    </div>
+                    <div class="streak-actions">
+                        <button id="cashout-btn" class="btn btn-cashout">💰 ENCAISSER (<span id="cashout-amount">0 €</span>)</button>
+                        <button id="double-btn" class="btn btn-spin-streak">🎲 RELANCER & DOUBLER !</button>
+                    </div>
+                </div>
+
+                <div id="betting-panel" class="betting-panel">
+                    <h3>1. CHOISISSEZ LA VALEUR DU JETON</h3>
+                    <div class="chips-selector">
+                        <button class="chip chip-1 active" data-value="1">1</button>
+                        <button class="chip chip-5" data-value="5">5</button>
+                        <button class="chip chip-25" data-value="25">25</button>
+                        <button class="chip chip-100" data-value="100">100</button>
+                        <button class="chip chip-500" data-value="500">500</button>
+                    </div>
+
+                    <h3>2. PLACEZ VOTRE MISE SUR UNE COULEUR</h3>
+                    <div class="betting-table">
+                        <div class="bet-spot spot-red" data-color="red">
+                            <div class="spot-title">ROUGE</div>
+                            <div class="spot-payout">Multiplie par x2</div>
+                            <div class="chip-container"></div>
+                        </div>
+                        <div class="bet-spot spot-green" data-color="green">
+                            <div class="spot-title">VERT</div>
+                            <div class="spot-payout">Multiplie par x35</div>
+                            <div class="chip-container"></div>
+                        </div>
+                        <div class="bet-spot spot-black" data-color="black">
+                            <div class="spot-title">NOIR</div>
+                            <div class="spot-payout">Multiplie par x2</div>
+                            <div class="chip-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="bet-info-bar">
+                        <span>Mise totale : <strong id="total-bet">0 €</strong></span>
+                        <button id="clear-btn" class="btn-text">Effacer la mise</button>
+                    </div>
+
+                    <button id="spin-btn" class="btn btn-spin" disabled>LANCER LA ROULETTE</button>
+                    <button id="ticket-btn" class="ticket-btn">🎫 JOUER AVEC UN TICKET (<span class="ticket-count">0</span>)</button>
+                </div>
+
+                <div id="message-box" class="message-box">
+                    Placez vos jetons sur une couleur pour commencer !
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../battle-pass.js"></script>
+    <script src="../rank.js"></script>
+    <script src="../potion.js"></script>
+    <script src="../sounds.js"></script>
+    <script src="../info-bubble.js"></script>
+    <script src="roulette.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine à Sous - Quitte ou Double</title>
+    <link rel="stylesheet" href="machine.css">
+    <link rel="stylesheet" href="../info-bubble.css">
+    <link rel="stylesheet" href="../battle-pass.css">
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="../no-select.css">
+</head>
+<body data-game="machine">
+    <div class="app-container">
+        <header>
+            <a href="../index.html" class="btn-back">← RETOUR AU LOBBY</a>
+            <div class="logo-title">
+                <h1>MACHINE À SOUS</h1>
+                <div class="subtitle">QUITTE OU DOUBLE</div>
+            </div>
+            <div class="balance-container">
+                <div class="balance-box">
+                    <span class="label">SOLDE VIRTUEL</span>
+                    <span id="balance-val" class="value">1000 €</span>
+                </div>
+                <button id="reload-btn" class="btn-reload" style="display: none;">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <main class="game-layout">
+            <div class="slot-machine-wrapper">
+                <div class="slot-machine">
+                    <div class="slot-window">
+                        <div class="reel-container"><div class="reel" id="reel-1"><div class="symbol">7️⃣</div></div></div>
+                        <div class="reel-container"><div class="reel" id="reel-2"><div class="symbol">7️⃣</div></div></div>
+                        <div class="reel-container"><div class="reel" id="reel-3"><div class="symbol">7️⃣</div></div></div>
+                        <div class="payline-indicator"></div>
+                    </div>
+                </div>
+
+                <div class="payout-table">
+                    <h4>TABLE DES GAINS (3 SYMBOLES ALIGNÉS)</h4>
+                    <div class="payout-grid">
+                        <div class="payout-item"><span>💎 💎 💎</span> <strong>x50</strong></div>
+                        <div class="payout-item"><span>7️⃣ 7️⃣ 7️⃣</span> <strong>x20</strong></div>
+                        <div class="payout-item"><span>🔔 🔔 🔔</span> <strong>x10</strong></div>
+                        <div class="payout-item"><span>🍉 🍉 🍉</span> <strong>x5</strong></div>
+                        <div class="payout-item"><span>🍋 🍋 🍋</span> <strong>x3</strong></div>
+                        <div class="payout-item"><span>🍒 🍒 🍒</span> <strong>x2</strong></div>
+                        <div class="payout-item full-width"><span>2 SYMBOLES IDENTIQUES</span> <strong>x1.5</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div id="betting-panel" class="control-section">
+                    <h3>1. CHOISISSEZ LA MISE</h3>
+                    <div class="chip-selector">
+                        <button class="chip active" data-value="1">1</button>
+                        <button class="chip" data-value="5">5</button>
+                        <button class="chip" data-value="25">25</button>
+                        <button class="chip" data-value="100">100</button>
+                        <button class="chip" data-value="500">500</button>
+                    </div>
+                    <div class="bet-info">Mise sélectionnée : <span id="current-bet-display">1 €</span></div>
+                    <button id="spin-btn" class="action-btn spin-btn">LANCER LA MACHINE</button>
+                    <button id="ticket-btn" class="ticket-btn">🎫 JOUER AVEC UN TICKET (<span class="ticket-count">0</span>)</button>
+                </div>
+
+                <div id="streak-panel" class="control-section hidden">
+                    <h3>2. MODE QUITTE OU DOUBLE !</h3>
+                    <div class="streak-info-box">
+                        <div class="streak-stat"><span>Série de victoires :</span> <strong id="streak-count">1</strong></div>
+                        <div class="streak-stat highlight"><span>Gain accumulé :</span> <strong id="current-gain">0 €</strong></div>
+                        <div class="streak-stat next"><span>Gain si réussite :</span> <strong id="next-gain">0 €</strong></div>
+                    </div>
+                    <p class="streak-instruction">Si vous alignez au moins 2 symboles, vous doublez vos gains. Sinon, vous perdez tout !</p>
+                    <div class="streak-actions">
+                        <button id="double-btn" class="action-btn double-btn">🔥 TENTER LE DOUBLE</button>
+                        <button id="cashout-btn" class="action-btn cashout-btn">💰 ENCAISSER (<span id="cashout-amount">0 €</span>)</button>
+                    </div>
+                </div>
+
+                <div id="message-box" class="message-box">Faites tourner la machine pour commencer !</div>
+
+                <div class="history-panel">
+                    <h4>Derniers tirages :</h4>
+                    <div id="history-list" class="history-list"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../battle-pass.js"></script>
+    <script src="../rank.js"></script>
+    <script src="../potion.js"></script>
+    <script src="../sounds.js"></script>
+    <script src="../info-bubble.js"></script>
+    <script src="machine.js"></script>
+</body>
+</html>

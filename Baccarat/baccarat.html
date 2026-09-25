@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat - Casino Virtual</title>
+    <link rel="stylesheet" href="baccarat.css">
+    <link rel="stylesheet" href="../info-bubble.css">
+    <link rel="stylesheet" href="../battle-pass.css">
+    <link rel="stylesheet" href="../common.css">
+    <link rel="stylesheet" href="../no-select.css">
+</head>
+<body data-game="baccarat">
+    <div class="app-container">
+        <header>
+            <a href="../index.html" class="btn-back">← RETOUR AU LOBBY</a>
+            <div class="logo-title">
+                <h1>BACCARAT</h1>
+                <div class="subtitle">LE PLUS PROCHE DE 9 GAGNE</div>
+            </div>
+            <div class="balance-container">
+                <div class="balance-box">
+                    <span class="label">SOLDE VIRTUEL</span>
+                    <span id="balance-val" class="value">0 €</span>
+                </div>
+                <button id="reload-btn" class="btn-reload" style="display: none;">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <main class="game-layout">
+            <div class="table-section">
+                <div class="hand-zone">
+                    <h3>JOUEUR <span id="player-score" class="score">0</span></h3>
+                    <div id="player-hand" class="hand"></div>
+                </div>
+                <div class="table-info-box">
+                    <div id="game-status" class="status-text">Placez votre mise pour commencer</div>
+                </div>
+                <div class="hand-zone">
+                    <h3>BANQUIER <span id="banker-score" class="score">0</span></h3>
+                    <div id="banker-hand" class="hand"></div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div id="betting-panel" class="control-section">
+                    <h3>1. CHOISISSEZ LA VALEUR DU JETON</h3>
+                    <div class="chip-selector">
+                        <button class="chip active" data-value="5">5</button>
+                        <button class="chip" data-value="10">10</button>
+                        <button class="chip" data-value="25">25</button>
+                        <button class="chip" data-value="50">50</button>
+                        <button class="chip" data-value="100">100</button>
+                    </div>
+                    <h3>2. PLACEZ VOTRE MISE</h3>
+                    <div class="bet-spots">
+                        <div class="bet-spot spot-player" data-bet="player">
+                            <div class="spot-title">JOUEUR</div>
+                            <div class="spot-payout">x2</div>
+                            <div class="chip-container"></div>
+                        </div>
+                        <div class="bet-spot spot-tie" data-bet="tie">
+                            <div class="spot-title">ÉGALITÉ</div>
+                            <div class="spot-payout">x8</div>
+                            <div class="chip-container"></div>
+                        </div>
+                        <div class="bet-spot spot-banker" data-bet="banker">
+                            <div class="spot-title">BANQUIER</div>
+                            <div class="spot-payout">x1.95</div>
+                            <div class="chip-container"></div>
+                        </div>
+                    </div>
+                    <div class="bet-info-bar">
+                        <span>Mise : <strong id="total-bet">0 €</strong></span>
+                        <button id="clear-btn" class="btn-text">Effacer la mise</button>
+                    </div>
+                    <button id="deal-btn" class="action-btn deal-btn" disabled>🎴 DISTRIBUER</button>
+                    <button id="ticket-btn" class="ticket-btn">🎫 JOUER AVEC UN TICKET (<span class="ticket-count">0</span>)</button>
+                </div>
+
+                <div id="message-box" class="message-box">Choisissez un jeton et cliquez sur une case pour parier !</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../battle-pass.js"></script>
+    <script src="../rank.js"></script>
+    <script src="../potion.js"></script>
+    <script src="../sounds.js"></script>
+    <script src="../info-bubble.js"></script>
+    <script src="baccarat.js"></script>
+</body>
+</html>
