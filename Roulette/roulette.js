@@ -182,7 +182,7 @@ function setupEventListeners() {
         });
     });
 
-    // ----- CHAMP CUSTOM (le petit cercle vide à droite du 500) -----
+    // ----- CHAMP CUSTOM -----
     const customInput = document.getElementById('custom-bet-input');
     if (customInput) {
         customInput.addEventListener('focus', () => {
@@ -215,7 +215,7 @@ function setupEventListeners() {
         });
     }
 
-    // ----- BET SPOTS (couleurs) -----
+    // ----- BET SPOTS -----
     document.querySelectorAll('.bet-spot').forEach(spot => {
         spot.addEventListener('click', () => {
             if (isSpinning || inStreak) return;
@@ -297,4 +297,197 @@ function showMessage(msg) { const b = document.getElementById('message-box'); if
 function draw(wAngle, bAngle, bRadius) {
     if (!ctx) return;
     const totalSlots = NUMBERS_LAYOUT.length;
-    const arc = (2 * Math.PI) / totalSl
+    const arc = (2 * Math.PI) / totalSlots;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const outerR = 200;
+    const innerR = 130;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR + 12, 0, 2 * Math.PI);
+    ctx.fillStyle = '#111';
+    ctx.fill();
+    ctx.strokeStyle = '#f1c40f';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    for (let i = 0; i < totalSlots; i++) {
+        const angle = wAngle + i * arc;
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR, angle, angle + arc);
+        ctx.arc(cx, cy, innerR, angle + arc, angle, true);
+        ctx.fillStyle = COLOR_CODES[NUMBERS_LAYOUT[i].color];
+        ctx.fill();
+        ctx.strokeStyle = '#f1c40f';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR, 0, 2 * Math.PI);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fill();
+    ctx.strokeStyle = '#f1c40f';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 25, 0, 2 * Math.PI);
+    ctx.fillStyle = '#f1c40f';
+    ctx.fill();
+
+    const bx = cx + bRadius * Math.cos(bAngle);
+    const by = cy + bRadius * Math.sin(bAngle);
+    ctx.beginPath();
+    ctx.arc(bx, by, 9, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function pickWeightedRouletteIndex(targetColor, multiplier) {
+    if (!targetColor || multiplier <= 1) {
+        return Math.floor(Math.random() * NUMBERS_LAYOUT.length);
+    }
+    const weights = NUMBERS_LAYOUT.map(n => n.color === targetColor ? multiplier : 1);
+    const total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < weights.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return i;
+    }
+    return NUMBERS_LAYOUT.length - 1;
+}
+
+function startNormalSpin() {
+    if (isSpinning || currentBet.amount === 0) return;
+
+    if (!usingTicket) {
+        const balance = getBalance();
+        if (currentBet.amount > balance) {
+            showMessage("❌ Solde insuffisant ! Utilisez un ticket ou baissez la mise.");
+            return;
+        }
+        setBalance(balance - currentBet.amount);
+        if (typeof addBattlePassXP === 'function') addBattlePassXP(currentBet.amount);
+    } else {
+        usingTicket = false;
+        showMessage("🎫 Ticket utilisé ! Roue gratuite...");
+    }
+
+    isSpinning = true;
+    updateUI();
+
+    const potionMult = (typeof getPotionMultiplier === 'function') ? getPotionMultiplier() : 1;
+    const idx = pickWeightedRouletteIndex(currentBet.color, potionMult);
+
+    showMessage(potionMult > 1 ? `🧪 Potion x${potionMult} active ! Chance augmentée...` : "Les jeux sont faits ! La roue tourne...");
+    playSpinSound();
+    runAnimation(idx, () => handleNormalResult(NUMBERS_LAYOUT[idx].color));
+}
+
+function startStreakSpin() {
+    if (isSpinning || !inStreak) return;
+    isSpinning = true;
+    if (typeof addBattlePassXP === 'function') addBattlePassXP(1);
+    updateUI();
+    showMessage(`Série ! Bille sur le ${streakColor.toUpperCase()}...`);
+    playSpinSound();
+    const idx = Math.floor(Math.random() * NUMBERS_LAYOUT.length);
+    runAnimation(idx, () => handleStreakResult(NUMBERS_LAYOUT[idx].color));
+}
+
+function runAnimation(targetIndex, onComplete) {
+    const totalSlots = NUMBERS_LAYOUT.length;
+    const arc = (2 * Math.PI) / totalSlots;
+    const slotOffset = targetIndex * arc + arc / 2;
+    const startW = currentWheelAngle;
+    const startB = currentBallAngle;
+    const targetW = startW + 5 * 2 * Math.PI;
+    const targetB = startB - 7 * 2 * Math.PI + (targetW + slotOffset - startB) % (2 * Math.PI);
+    const startR = 180;
+    const targetR = 150;
+    const duration = 4000;
+    const startTime = performance.now();
+
+    function animate(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        currentWheelAngle = startW + (targetW - startW) * ease;
+        currentBallAngle = startB + (targetB - startB) * ease;
+        if (progress > 0.5) {
+            const dp = (progress - 0.5) / 0.5;
+            currentBallRadius = startR - (startR - targetR) * (1 - Math.pow(1 - dp, 2));
+        } else currentBallRadius = startR;
+        draw(currentWheelAngle, currentBallAngle, currentBallRadius);
+        if (progress < 1) requestAnimationFrame(animate);
+        else { isSpinning = false; stopSpinSound(); onComplete(); }
+    }
+    requestAnimationFrame(animate);
+}
+
+function handleNormalResult(color) {
+    addHistory(color);
+    if (color === currentBet.color) {
+        const mult = color === 'green' ? 35 : 2;
+        accumulatedGain = currentBet.amount * mult;
+        streakCount = 1;
+        streakColor = currentBet.color;
+        inStreak = true;
+        showMessage(`GAGNÉ ! ${color.toUpperCase()}. Gain : ${accumulatedGain}`);
+        currentBet = { color: null, amount: 0 };
+    } else {
+        showMessage(`PERDU ! La bille s'est arrêtée sur ${color.toUpperCase()}.`);
+        currentBet = { color: null, amount: 0 };
+    }
+    updateUI();
+}
+
+function handleStreakResult(color) {
+    addHistory(color);
+    if (color === streakColor) {
+        accumulatedGain *= 2;
+        streakCount++;
+        showMessage(`GAGNÉ ! ${color.toUpperCase()} ! Gain : ${accumulatedGain}`);
+    } else {
+        showMessage(`PERDU ! ${color.toUpperCase()}. Série terminée.`);
+        inStreak = false;
+        accumulatedGain = 0;
+        streakCount = 0;
+        streakColor = null;
+    }
+    updateUI();
+}
+
+function cashout() {
+    if (!inStreak) return;
+    const gain = accumulatedGain;
+    setBalance(getBalance() + gain);
+    showMessage(`ENCAISSÉ ! Vous remportez ${gain} !`);
+    inStreak = false;
+    accumulatedGain = 0;
+    streakCount = 0;
+    streakColor = null;
+    updateUI();
+    if (typeof playCashRegister === 'function') {
+        try { playCashRegister(); } catch (e) {}
+    }
+}
+
+function addHistory(color) {
+    history.unshift(color);
+    if (history.length > 8) history.pop();
+    const list = document.getElementById('history-list');
+    if (!list) return;
+    list.innerHTML = '';
+    history.forEach(c => {
+        const item = document.createElement('div');
+        item.className = `history-item ${c}`;
+        list.appendChild(item);
+    });
+}
