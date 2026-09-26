@@ -1,64 +1,85 @@
 // battle-pass.js
 // Système de Pass de Combat + gestion des tickets + XP de rang
 
-const BP_MAX_LEVEL = 50;
-const BP_SEASON_DURATION_DAYS = 21;
+const BP_MAX_LEVEL = 100;
+const BP_SEASON_DURATION_DAYS = 60;
 
+// Progression par palier (XP nécessaire pour passer au niveau suivant)
+function getXPForLevel(level) {
+    // level = palier ACTUEL (on renvoie l'XP nécessaire pour passer au suivant)
+    if (level >= 100) return 0;
+    if (level < 10)   return 100;      // 1 → 10
+    if (level < 20)   return 500;      // 10 → 20
+    if (level < 30)   return 1000;     // 20 → 30
+    if (level < 40)   return 2500;     // 30 → 40
+    if (level < 50)   return 5000;     // 40 → 50
+    if (level < 60)   return 10000;    // 50 → 60
+    if (level < 70)   return 20000;    // 60 → 70
+    if (level < 80)   return 40000;    // 70 → 80
+    if (level < 90)   return 75000;    // 80 → 90
+    return 150000;                     // 90 → 100
+}
+
+// Construit la table des seuils cumulés (XP total pour atteindre chaque niveau)
 const BP_XP_THRESHOLDS = (function() {
-    const arr = [0];
+    const arr = [0]; // niveau 1 = 0 XP
     for (let i = 1; i < BP_MAX_LEVEL; i++) {
-        let xpNeeded;
-        if (i < 10) xpNeeded = 50;
-        else if (i < 20) xpNeeded = 120;
-        else if (i < 30) xpNeeded = 250;
-        else xpNeeded = 500;
-        arr.push(arr[i - 1] + xpNeeded);
+        arr.push(arr[i - 1] + getXPForLevel(i));
     }
     return arr;
 })();
 
+// Récompenses : générées dynamiquement pour 100 niveaux
 const BP_REWARDS = (function() {
     const rewards = [];
+
+    // Templates de récompenses gratuites et premium (cyclent)
     const freeTemplates = [
-        { type: 'tokens', amount: 10 },
-        { type: 'tokens', amount: 5 },
         { type: 'tokens', amount: 25 },
-        { type: 'tokens', amount: 15 },
-        { type: 'potion-x2', amount: 1 },
         { type: 'tokens', amount: 50 },
-        { type: 'tokens', amount: 10 },
-        { type: 'tokens', amount: 20 },
-        { type: 'tokens', amount: 30 },
-        { type: 'potion-x2', amount: 1 }
-    ];
-    const premiumTemplates = [
-        { type: 'tokens', amount: 50 },
-        { type: 'potion-x2', amount: 1 },
         { type: 'tokens', amount: 100 },
-        { type: 'tokens', amount: 75 },
-        { type: 'potion-x5', amount: 1 },
+        { type: 'potion-x2', amount: 1 },
+        { type: 'tokens', amount: 200 },
         { type: 'tokens', amount: 150 },
-        { type: 'tokens', amount: 75 },
+        { type: 'potion-x2', amount: 1 },
+        { type: 'tokens', amount: 300 },
+        { type: 'tokens', amount: 250 },
+        { type: 'ticket', amount: 1 }
+    ];
+
+    const premiumTemplates = [
         { type: 'tokens', amount: 100 },
+        { type: 'potion-x2', amount: 2 },
+        { type: 'tokens', amount: 250 },
+        { type: 'tokens', amount: 500 },
         { type: 'potion-x5', amount: 1 },
-        { type: 'tokens', amount: 200 }
+        { type: 'tokens', amount: 1000 },
+        { type: 'tokens', amount: 750 },
+        { type: 'tokens', amount: 500 },
+        { type: 'potion-x5', amount: 1 },
+        { type: 'tokens', amount: 1500 }
     ];
 
     for (let level = 1; level <= BP_MAX_LEVEL; level++) {
         let free, premium;
 
+        // Paliers spéciaux tous les 5 niveaux
         if (level === BP_MAX_LEVEL) {
-            free = { type: 'tokens', amount: 200 };
-            premium = { type: 'tokens', amount: 2000 };
-        } else if (level % 15 === 0) {
-            free = { type: 'ticket', amount: 1 };
-            premium = { type: 'ticket', amount: 3 };
+            // Récompense finale niveau 100
+            free = { type: 'tokens', amount: 10000 };
+            premium = { type: 'tokens', amount: 100000 };
+        } else if (level % 25 === 0) {
+            // Tous les 25 niveaux : gros ticket
+            free = { type: 'ticket', amount: 3 };
+            premium = { type: 'ticket', amount: 10 };
         } else if (level % 10 === 0) {
-            free = { type: 'tokens', amount: 100 };
-            premium = { type: 'tokens', amount: 500 };
+            // Tous les 10 niveaux : gros bonus jetons
+            free = { type: 'tokens', amount: 1000 };
+            premium = { type: 'tokens', amount: 5000 };
         } else if (level % 5 === 0) {
-            free = { type: 'potion-x2', amount: 1 };
-            premium = { type: 'potion-x5', amount: 1 };
+            // Tous les 5 niveaux : potions
+            free = { type: 'potion-x2', amount: 2 };
+            premium = { type: 'potion-x5', amount: 2 };
         } else {
             free = freeTemplates[(level - 1) % freeTemplates.length];
             premium = premiumTemplates[(level - 1) % premiumTemplates.length];
@@ -180,10 +201,8 @@ function addBattlePassXP(amount) {
     showXPGainPopup(amount);
     if (newLevel > oldLevel) showLevelUpPopup(newLevel);
 
-    // ✅ Notifie le système de rang (si présent sur la page)
     if (typeof updateRankButton === 'function') updateRankButton();
 
-    // ✅ Détecte un rank up et affiche la popup
     if (typeof RANKS !== 'undefined' && typeof getCurrentRankIndex === 'function') {
         const oldRankIdx = getCurrentRankIndex(oldRankXP);
         const newRankIdx = getCurrentRankIndex(users[email].rankXP);
