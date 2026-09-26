@@ -419,7 +419,161 @@ h3 {
 }
 
 /* ============================================
-   RESPONSIVE MOBILE — Roulette
+   SLIDER DE MISE — Roulette
+   ============================================ */
+.bet-slider-wrapper {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #4a1570;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bet-slider-wrapper > label {
+    font-size: 0.85rem;
+    color: #b39ddb;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bet-slider-wrapper > label strong {
+    color: #f1c40f;
+    font-size: 1.05rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+#bet-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #4a1570 0%, #f1c40f 100%);
+    outline: none;
+    cursor: pointer;
+    margin: 0;
+}
+
+#bet-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffe98a 0%, #f1c40f 50%, #b8860b 100%);
+    border: 3px solid #fff;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.8), 0 2px 6px rgba(0,0,0,0.5);
+    transition: transform 0.15s ease;
+}
+
+#bet-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 25px rgba(241, 196, 15, 1);
+}
+
+#bet-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffe98a 0%, #f1c40f 50%, #b8860b 100%);
+    border: 3px solid #fff;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.8);
+}
+
+.bet-slider-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.slider-mini-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #fff;
+    border: 2px solid #fff;
+    font-size: 1.3rem;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+    line-height: 1;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.slider-mini-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(52, 152, 219, 0.8);
+}
+
+.slider-mini-btn:active {
+    transform: scale(0.95);
+}
+
+#bet-slider-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 14px;
+    background: #0d0f1b;
+    border: 2px solid #4a1570;
+    border-radius: 10px;
+    color: #f1c40f;
+    font-size: 1rem;
+    font-weight: 900;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    outline: none;
+    transition: border-color 0.2s ease;
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+#bet-slider-input::-webkit-outer-spin-button,
+#bet-slider-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#bet-slider-input:focus {
+    border-color: #f1c40f;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.5);
+}
+
+.slider-max-btn {
+    padding: 0 14px;
+    height: 38px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.slider-max-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.8);
+}
+
+/* ============================================
+   RESPONSIVE — Roulette
    ============================================ */
 @media (max-width: 900px) {
     #game-container {
@@ -521,6 +675,40 @@ h3 {
         font-size: 0.85rem;
         padding: 10px 12px;
         min-height: 50px;
+    }
+
+    .bet-slider-wrapper {
+        padding: 12px;
+    }
+
+    .bet-slider-wrapper > label {
+        font-size: 0.78rem;
+    }
+
+    .bet-slider-wrapper > label strong {
+        font-size: 0.95rem;
+    }
+
+    #bet-slider::-webkit-slider-thumb {
+        width: 22px;
+        height: 22px;
+    }
+
+    .slider-mini-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 1.15rem;
+    }
+
+    #bet-slider-input {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+
+    .slider-max-btn {
+        height: 34px;
+        padding: 0 10px;
+        font-size: 0.72rem;
     }
 }
 
