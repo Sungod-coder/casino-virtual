@@ -64,6 +64,17 @@
                         <button class="chip chip-500" data-value="500">500</button>
                     </div>
 
+                    <div class="bet-slider-wrapper">
+                        <label for="bet-slider">Mise : <strong id="bet-slider-value">1</strong> <span class="coin small">M</span></label>
+                        <input type="range" id="bet-slider" min="1" max="10000" value="1" step="1">
+                        <div class="bet-slider-controls">
+                            <button type="button" id="bet-slider-minus" class="slider-mini-btn">−</button>
+                            <input type="number" id="bet-slider-input" min="1" max="10000" value="1">
+                            <button type="button" id="bet-slider-plus" class="slider-mini-btn">+</button>
+                            <button type="button" id="bet-slider-max" class="slider-max-btn">MAX</button>
+                        </div>
+                    </div>
+
                     <h3>2. PLACEZ VOTRE MISE SUR UNE COULEUR</h3>
                     <div class="betting-table">
                         <div class="bet-spot spot-red" data-color="red">
