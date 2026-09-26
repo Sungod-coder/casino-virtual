@@ -2,15 +2,15 @@
 // Système de rangs style League of Legends
 
 const RANKS = [
-    { name: 'Fer',          xp: 0,       color: '#95a5a6', color2: '#4a5a5c', color3: '#95a5a6', glow: '#7f8c8d' },
-    { name: 'Bronze',       xp: 5000,    color: '#cd7f32', color2: '#8b5a2b', color3: '#cd7f32', glow: '#e67e22' },
-    { name: 'Argent',       xp: 15000,   color: '#ecf0f1', color2: '#95a5a6', color3: '#ecf0f1', glow: '#bdc3c7' },
-    { name: 'Or',           xp: 30000,   color: '#f1c40f', color2: '#d35400', color3: '#f1c40f', glow: '#ffd700' },
-    { name: 'Platine',      xp: 50000,   color: '#1abc9c', color2: '#0e6655', color3: '#1abc9c', glow: '#16a085' },
-    { name: 'Diamant',      xp: 80000,   color: '#3498db', color2: '#1f618d', color3: '#3498db', glow: '#2980b9' },
-    { name: 'Maître',       xp: 120000,  color: '#9b59b6', color2: '#6c3483', color3: '#9b59b6', glow: '#8e44ad' },
-    { name: 'Grand Maître', xp: 180000,  color: '#e74c3c', color2: '#922b21', color3: '#e74c3c', glow: '#ff4757' },
-    { name: 'Onix',         xp: 250000,  color: '#e74c3c', color2: '#6c3483', color3: '#f1c40f', glow: '#ffcc00' }
+    { name: 'Fer',          xp: 0,        color: '#95a5a6', color2: '#4a5a5c', color3: '#95a5a6', glow: '#7f8c8d' },
+    { name: 'Bronze',       xp: 5000,     color: '#cd7f32', color2: '#8b5a2b', color3: '#cd7f32', glow: '#e67e22' },
+    { name: 'Argent',       xp: 15000,    color: '#ecf0f1', color2: '#95a5a6', color3: '#ecf0f1', glow: '#bdc3c7' },
+    { name: 'Or',           xp: 30000,    color: '#f1c40f', color2: '#d35400', color3: '#f1c40f', glow: '#ffd700' },
+    { name: 'Platine',      xp: 100000,   color: '#1abc9c', color2: '#0e6655', color3: '#1abc9c', glow: '#16a085' },
+    { name: 'Diamant',      xp: 250000,   color: '#3498db', color2: '#1f618d', color3: '#3498db', glow: '#2980b9' },
+    { name: 'Maître',       xp: 500000,   color: '#9b59b6', color2: '#6c3483', color3: '#9b59b6', glow: '#8e44ad' },
+    { name: 'Grand Maître', xp: 800000,   color: '#e74c3c', color2: '#922b21', color3: '#e74c3c', glow: '#ff4757' },
+    { name: 'Onix',         xp: 2300000,  color: '#e74c3c', color2: '#6c3483', color3: '#f1c40f', glow: '#ffcc00' }
 ];
 
 function rankGetUsers() { return JSON.parse(localStorage.getItem('casino_users')) || {}; }
@@ -47,7 +47,6 @@ function getNextRank(currentIndex) {
 //   POPUP DE RANK UP — affichée DEVANT TOUT
 // ============================================
 function showRankUpPopup(rank) {
-    // ---- 1. Crée/réutilise l'overlay ----
     let overlay = document.getElementById('rankup-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -59,7 +58,6 @@ function showRankUpPopup(rank) {
     void overlay.offsetWidth;
     overlay.classList.add('visible');
 
-    // ---- 2. Crée la popup ----
     const popup = document.createElement('div');
     popup.className = 'rankup-popup';
     popup.innerHTML = `
@@ -71,19 +69,16 @@ function showRankUpPopup(rank) {
     `;
     document.body.appendChild(popup);
 
-    // Force le navigateur à peindre l'état initial avant la transition
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             popup.classList.add('show');
         });
     });
 
-    // ---- 3. Son ----
     if (typeof playDiamondSound === 'function') {
         try { playDiamondSound(); } catch (e) {}
     }
 
-    // ---- 4. Fade out propre ----
     setTimeout(() => {
         popup.classList.add('fade-out');
         overlay.classList.remove('visible');
