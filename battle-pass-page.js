@@ -10,7 +10,6 @@ function renderBattlePass() {
         return;
     }
 
-    // ✅ Sauvegarde la position de scroll AVANT le re-render
     const scrollContainer = document.querySelector('.bp-scroll-container');
     const savedScrollLeft = scrollContainer ? scrollContainer.scrollLeft : 0;
 
@@ -170,8 +169,30 @@ function showBPMessage(text, type) {
     setTimeout(() => { msg.textContent = ''; msg.className = 'bp-message'; }, 3500);
 }
 
+// ============================================
+//   INIT — Attache le bouton "Tout réclamer"
+// ============================================
 document.addEventListener('DOMContentLoaded', () => {
     bpHasAutoScrolled = false;
+
+    // 🎁 Attache l'écouteur par JS (plus fiable que onclick inline)
+    const claimAllBtn = document.getElementById('bp-claim-all-btn');
+    if (claimAllBtn) {
+        claimAllBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎁 Bouton TOUT RÉCLAMER cliqué');
+            if (typeof bpClaimAllRewards === 'function') {
+                bpClaimAllRewards();
+            } else {
+                console.error('❌ bpClaimAllRewards non trouvée');
+                alert('Erreur : fonction introuvable. Vérifie que battle-pass.js est bien chargé.');
+            }
+        });
+    } else {
+        console.warn('⚠️ Bouton bp-claim-all-btn introuvable dans le DOM');
+    }
+
     renderBattlePass();
     window.addEventListener('storage', renderBattlePass);
 });
