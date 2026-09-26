@@ -61,7 +61,6 @@ function stopSpinSound() {
             }
         }, 30);
 
-        // 🛑 Sécurité : force l'arrêt après 500ms max
         setTimeout(() => {
             try {
                 clearInterval(fade);
@@ -162,8 +161,128 @@ function updateUI() {
 window.addEventListener('storage', updateUI);
 
 function setupEventListeners() {
+    // ----- CHIPS -----
     document.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', (e) => {
             if (isSpinning || inStreak) return;
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            e.target.classList
+            e.target.classList.add('active');
+            currentChipValue = parseInt(e.target.dataset.value, 10);
+
+            const customInput = document.getElementById('custom-bet-input');
+            if (customInput) {
+                customInput.value = '';
+                customInput.classList.remove('active');
+            }
+
+            // Si une couleur est déjà sélectionnée → on remplace la mise
+            if (currentBet.color) {
+                currentBet.amount = currentChipValue;
+                updateUI();
+            }
+        });
+    });
+
+    // ----- CHAMP CUSTOM -----
+    const customInput = document.getElementById('custom-bet-input');
+    if (customInput) {
+        customInput.addEventListener('focus', () => {
+            if (isSpinning || inStreak) return;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            customInput.classList.add('active');
+        });
+
+        customInput.addEventListener('input', () => {
+            if (isSpinning || inStreak) return;
+            const val = parseInt(customInput.value, 10);
+            if (isNaN(val) || val < 1) return;
+            currentChipValue = val;
+
+            // Si une couleur est sélectionnée → mise = valeur custom
+            if (currentBet.color) {
+                currentBet.amount = val;
+                const labels = { red: 'ROUGE', black: 'NOIR', green: 'VERT' };
+                showMessage(`💰 Mise sur ${labels[currentBet.color]} : ${val}`);
+                updateUI();
+            }
+        });
+
+        customInput.addEventListener('blur', () => {
+            if (!customInput.value || parseInt(customInput.value, 10) < 1) {
+                customInput.classList.remove('active');
+                currentChipValue = 1;
+                const chip1 = document.querySelector('.chip[data-value="1"]');
+                if (chip1) chip1.classList.add('active');
+            }
+        });
+    }
+
+    // ----- BET SPOTS (Couleurs) -----
+    document.querySelectorAll('.bet-spot').forEach(spot => {
+        spot.addEventListener('click', () => {
+            if (isSpinning || inStreak) return;
+            const color = spot.dataset.color;
+            const labels = { red: 'ROUGE', black: 'NOIR', green: 'VERT' };
+
+            if (currentBet.color === color) {
+                currentBet.amount += currentChipValue;
+            } else {
+                currentBet.amount = currentChipValue;
+            }
+            currentBet.color = color;
+            showMessage(`💰 Mise sur ${labels[color]} : ${currentBet.amount}`);
+            updateUI();
+        });
+    });
+
+    // ----- EFFACER -----
+    const clearBtn = document.getElementById('clear-btn');
+    if (clearBtn) clearBtn.addEventListener('click', clearBet);
+
+    // ----- LANCER -----
+    const spinBtn = document.getElementById('spin-btn');
+    if (spinBtn) spinBtn.addEventListener('click', () => { usingTicket = false; startNormalSpin(); });
+
+    // ----- TICKET -----
+    const ticketBtn = document.getElementById('ticket-btn');
+    if (ticketBtn) ticketBtn.addEventListener('click', () => {
+        if (isSpinning || inStreak) return;
+        if (currentBet.amount === 0) { showMessage("❌ Sélectionnez d'abord une couleur et une mise !"); return; }
+        if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
+            showMessage("❌ Aucun ticket disponible !");
+            return;
+        }
+        usingTicket = true;
+        startNormalSpin();
+    });
+
+    // ----- CASHOUT + DOUBLE -----
+    const cashoutBtn = document.getElementById('cashout-btn');
+    if (cashoutBtn) cashoutBtn.addEventListener('click', cashout);
+
+    const doubleBtn = document.getElementById('double-btn');
+    if (doubleBtn) doubleBtn.addEventListener('click', startStreakSpin);
+
+    // ----- RELOAD -----
+    const reloadBtn = document.getElementById('reload-btn');
+    if (reloadBtn) reloadBtn.addEventListener('click', reloadBalance);
+}
+
+function reloadBalance() {
+    if (isSpinning) return;
+    setBalance(10);
+    currentBet = { color: null, amount: 0 };
+    inStreak = false;
+    accumulatedGain = 0;
+    streakCount = 0;
+    streakColor = null;
+    const customInput = document.getElementById('custom-bet-input');
+    if (customInput) { customInput.value = ''; customInput.classList.remove('active'); }
+    showMessage("Solde rechargé de 10 !");
+    updateUI();
+}
+
+function clearBet() {
+    if (isSpinning || inStreak) return;
+    currentBet = { color: null, amount: 0 };
+    const customInput = document.getElementById
