@@ -18,7 +18,7 @@
                 <span class="bp-season-icon">🎰</span>
                 <div>
                     <div class="bp-season-label">SAISON 1</div>
-                    <div class="bp-season-days"><span id="bp-days-remaining">21</span> jours restants</div>
+                    <div class="bp-season-days"><span id="bp-days-remaining">60</span> jours restants</div>
                 </div>
             </div>
 
@@ -38,16 +38,24 @@
 
         <div class="bp-progress-wrap">
             <div class="bp-progress-header">
-                <span class="bp-level-badge">NIVEAU <strong id="bp-current-level">1</strong> / 50</span>
+                <span class="bp-level-badge">NIVEAU <strong id="bp-current-level">1</strong> / 100</span>
                 <span class="bp-xp-text"><span id="bp-current-xp">0</span> XP</span>
             </div>
             <div class="bp-progress-bar">
                 <div id="bp-progress-fill" class="bp-progress-fill"></div>
             </div>
             <div class="bp-progress-info">
-                <span id="bp-xp-to-next">50 XP pour le niveau suivant</span>
+                <span id="bp-xp-to-next">100 XP pour le niveau suivant</span>
                 <span id="bp-premium-status">Pass Gratuit</span>
             </div>
+        </div>
+
+        <!-- 🎁 Bouton Tout Réclamer -->
+        <div class="bp-claim-all-wrap">
+            <button id="bp-claim-all-btn" class="bp-claim-all-btn" onclick="bpClaimAllRewards()">
+                🎁 TOUT RÉCLAMER
+            </button>
+            <span id="bp-claim-all-count" class="bp-claim-all-count"></span>
         </div>
 
         <div class="bp-scroll-container">
@@ -59,7 +67,6 @@
                 <div id="bp-grid" class="bp-grid"></div>
             </div>
         </div>
-
     </div>
 
     <script src="battle-pass.js"></script>
