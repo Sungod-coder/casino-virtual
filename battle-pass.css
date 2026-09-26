@@ -760,8 +760,21 @@
         gap: 2px;
     }
 
-    .bp-slot-icon {
-        font-size: 1.1rem;
+        .bp-slot-icon {
+        font-size: 1.5rem;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 1.5rem;
+    }
+
+    .bp-slot-text .coin,
+    .bp-slot-text .coin.small {
+        display: inline-flex !important;
+        width: 14px;
+        height: 14px;
+        font-size: 0.55rem;
     }
 
     .bp-slot-text {
