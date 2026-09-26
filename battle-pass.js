@@ -6,7 +6,6 @@ const BP_SEASON_DURATION_DAYS = 60;
 
 // Progression par palier (XP nécessaire pour passer au niveau suivant)
 function getXPForLevel(level) {
-    // level = palier ACTUEL (on renvoie l'XP nécessaire pour passer au suivant)
     if (level >= 100) return 0;
     if (level < 10)   return 100;      // 1 → 10
     if (level < 20)   return 500;      // 10 → 20
@@ -30,10 +29,15 @@ const BP_XP_THRESHOLDS = (function() {
 })();
 
 // Récompenses : générées dynamiquement pour 100 niveaux
+// 🎫 Répartition : GRATUIT = 5 tickets total | PREMIUM = 10 tickets total
 const BP_REWARDS = (function() {
     const rewards = [];
 
-    // Templates de récompenses gratuites et premium (cyclent)
+    // 🎯 Paliers où on donne des tickets
+    const FREE_TICKET_LEVELS    = [15, 30, 45, 60, 75];                     // 5 tickets au total
+    const PREMIUM_TICKET_LEVELS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]; // 10 tickets au total
+
+    // Templates de récompenses (cyclent pour les niveaux sans ticket)
     const freeTemplates = [
         { type: 'tokens', amount: 25 },
         { type: 'tokens', amount: 50 },
@@ -44,7 +48,7 @@ const BP_REWARDS = (function() {
         { type: 'potion-x2', amount: 1 },
         { type: 'tokens', amount: 300 },
         { type: 'tokens', amount: 250 },
-        { type: 'ticket', amount: 1 }
+        { type: 'tokens', amount: 400 }
     ];
 
     const premiumTemplates = [
@@ -63,25 +67,33 @@ const BP_REWARDS = (function() {
     for (let level = 1; level <= BP_MAX_LEVEL; level++) {
         let free, premium;
 
-        // Paliers spéciaux tous les 5 niveaux
-        if (level === BP_MAX_LEVEL) {
-            // Récompense finale niveau 100
+        // ========== GRATUIT ==========
+        if (FREE_TICKET_LEVELS.includes(level)) {
+            free = { type: 'ticket', amount: 1 };
+        } else if (level === BP_MAX_LEVEL) {
             free = { type: 'tokens', amount: 10000 };
-            premium = { type: 'tokens', amount: 100000 };
         } else if (level % 25 === 0) {
-            // Tous les 25 niveaux : gros ticket
-            free = { type: 'ticket', amount: 3 };
-            premium = { type: 'ticket', amount: 10 };
+            free = { type: 'potion-x5', amount: 3 };
         } else if (level % 10 === 0) {
-            // Tous les 10 niveaux : gros bonus jetons
             free = { type: 'tokens', amount: 1000 };
-            premium = { type: 'tokens', amount: 5000 };
         } else if (level % 5 === 0) {
-            // Tous les 5 niveaux : potions
             free = { type: 'potion-x2', amount: 2 };
-            premium = { type: 'potion-x5', amount: 2 };
         } else {
             free = freeTemplates[(level - 1) % freeTemplates.length];
+        }
+
+        // ========== PREMIUM ==========
+        if (PREMIUM_TICKET_LEVELS.includes(level)) {
+            premium = { type: 'ticket', amount: 1 };
+        } else if (level === BP_MAX_LEVEL) {
+            premium = { type: 'tokens', amount: 100000 };
+        } else if (level % 25 === 0) {
+            premium = { type: 'potion-x5', amount: 10 };
+        } else if (level % 10 === 0) {
+            premium = { type: 'tokens', amount: 5000 };
+        } else if (level % 5 === 0) {
+            premium = { type: 'potion-x5', amount: 2 };
+        } else {
             premium = premiumTemplates[(level - 1) % premiumTemplates.length];
         }
 
