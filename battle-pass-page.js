@@ -43,6 +43,9 @@ function renderBattlePass() {
         xpToNext.textContent = `${xpNeeded - xpInLevel} XP pour le niveau ${currentLevel + 1}`;
     }
 
+    // 🎁 Met à jour le bouton "Tout réclamer"
+    if (typeof bpUpdateClaimAllButton === 'function') bpUpdateClaimAllButton();
+
     // Grille
     const grid = document.getElementById('bp-grid');
     grid.innerHTML = '';
@@ -58,7 +61,7 @@ function renderBattlePass() {
         const column = document.createElement('div');
         column.className = 'bp-column' + (isUnlocked ? ' unlocked' : '') + (isCurrent ? ' current' : '');
 
-        // Carte Premium (en haut)
+        // Carte Premium
         const premiumCard = document.createElement('div');
         premiumCard.className = 'bp-slot premium-slot';
         if (!premiumOwned) premiumCard.classList.add('locked');
@@ -78,7 +81,7 @@ function renderBattlePass() {
             premiumCard.addEventListener('click', () => claimLevel(level, 'premium'));
         }
 
-        // Carte Gratuit (en bas)
+        // Carte Gratuite
         const freeCard = document.createElement('div');
         freeCard.className = 'bp-slot free-slot';
         if (freeClaimed) freeCard.classList.add('claimed');
@@ -108,8 +111,7 @@ function renderBattlePass() {
         grid.appendChild(column);
     });
 
-    // ✅ Auto-scroll SEULEMENT au premier chargement
-    // Ensuite, on restaure la position de scroll où l'utilisateur était
+    // Auto-scroll au premier chargement
     setTimeout(() => {
         if (!bpHasAutoScrolled) {
             bpHasAutoScrolled = true;
@@ -118,7 +120,6 @@ function renderBattlePass() {
                 current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             }
         } else if (scrollContainer) {
-            // Restaure la position exacte où l'utilisateur était
             scrollContainer.scrollLeft = savedScrollLeft;
         }
     }, 50);
@@ -166,7 +167,7 @@ function showBPMessage(text, type) {
     }
     msg.textContent = text;
     msg.className = 'bp-message ' + type;
-    setTimeout(() => { msg.textContent = ''; msg.className = 'bp-message'; }, 2500);
+    setTimeout(() => { msg.textContent = ''; msg.className = 'bp-message'; }, 3500);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
