@@ -3,10 +3,10 @@
 // + son synchronisé avec volume réduit
 
 const SHOP_ITEMS = {
-    'potion-x2':     { name: 'Potion Chance x2',       price: 1000, unique: false },
-    'potion-x5':     { name: 'Potion Chance x5',       price: 2500, unique: false },
-    'mystery-chest': { name: 'Coffre Mystère',         price: 5000, unique: false },
-    'battle-pass':   { name: 'Pass Combat Premium',    price: 8000, unique: true  }
+    'potion-x2':     { name: 'Potion Chance x2',       price: 1500,  unique: false },
+    'potion-x5':     { name: 'Potion Chance x5',       price: 3750,  unique: false },
+    'mystery-chest': { name: 'Coffre Mystère',         price: 7500,  unique: false },
+    'battle-pass':   { name: 'Pass Combat Premium',    price: 12000, unique: true  }
 };
 
 const CHEST_REWARDS = [
@@ -188,16 +188,13 @@ function openChest() {
             roller.style.transition = `transform ${duration}ms cubic-bezier(${bezier.join(', ')})`;
             roller.style.transform = `translateX(${targetX}px)`;
 
-            // 🎵 Démarre le son de spin
             if (typeof playChestSpinSound === 'function') {
                 try { playChestSpinSound(); } catch (e) {}
-                // ✅ Force le volume bas
                 if (typeof chestSpinSound !== 'undefined' && chestSpinSound) {
                     chestSpinSound.volume = 0.15;
                 }
             }
 
-            // 🎵 Synchronise la vitesse du son avec l'animation
             const startTime = performance.now();
             const startRate = 1.6;
             const endRate = 0.35;
@@ -218,7 +215,6 @@ function openChest() {
             requestAnimationFrame(syncSoundRate);
 
             setTimeout(() => {
-                // 🛑 Arrête le son dès que le rouleau est arrêté
                 if (typeof stopChestSpinSound === 'function') {
                     try { stopChestSpinSound(); } catch (e) {}
                 }
