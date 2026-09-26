@@ -417,3 +417,157 @@ h3 {
     box-shadow: 0 0 15px rgba(241, 196, 15, 0.4);
     transform: translateX(-3px);
 }
+
+/* ============================================
+   RESPONSIVE MOBILE — Roulette
+   ============================================ */
+@media (max-width: 900px) {
+    #game-container {
+        padding: 16px;
+        gap: 14px;
+    }
+
+    header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .logo-title h1 {
+        font-size: 1.4rem;
+    }
+
+    .logo-title .subtitle {
+        font-size: 0.7rem;
+    }
+
+    .btn-back {
+        font-size: 0.78rem;
+        padding: 8px 14px;
+        align-self: center;
+    }
+
+    .balance-box {
+        padding: 6px 14px;
+    }
+
+    .balance-box .value {
+        font-size: 1.1rem;
+    }
+
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .wheel-wrapper {
+        max-width: 320px;
+        margin: 0 auto;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .history-container {
+        font-size: 0.75rem;
+        padding: 8px 10px;
+    }
+
+    .chips-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .chip {
+        width: 42px;
+        height: 42px;
+        font-size: 0.78rem;
+    }
+
+    .betting-table {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .bet-spot {
+        height: 80px;
+    }
+
+    .spot-title {
+        font-size: 1rem;
+    }
+
+    .spot-payout {
+        font-size: 0.7rem;
+    }
+
+    .btn {
+        padding: 12px;
+        font-size: 1rem;
+    }
+
+    .streak-panel {
+        padding: 16px;
+    }
+
+    .streak-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .message-box {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+        min-height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    #game-container {
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .logo-title h1 {
+        font-size: 1.15rem;
+        letter-spacing: 0.5px;
+    }
+
+    .logo-title .subtitle {
+        font-size: 0.62rem;
+        letter-spacing: 1px;
+    }
+
+    .wheel-wrapper {
+        max-width: 260px;
+    }
+
+    .chip {
+        width: 38px;
+        height: 38px;
+        font-size: 0.72rem;
+    }
+
+    .bet-spot {
+        height: 70px;
+    }
+
+    .spot-title {
+        font-size: 0.9rem;
+    }
+
+    h3 {
+        font-size: 0.78rem;
+    }
+
+    .btn {
+        font-size: 0.92rem;
+        padding: 11px;
+    }
+
+    .data-value {
+        font-size: 1rem;
+    }
+}
