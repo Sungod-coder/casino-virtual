@@ -1,5 +1,4 @@
 // battle-pass-page.js
-// Rendu de la page du Pass de Combat style Brawl Stars
 
 let bpHasAutoScrolled = false;
 
@@ -16,7 +15,6 @@ function renderBattlePass() {
     const currentLevel = bpGetLevel(data.bp.xp);
     const currentXP = data.bp.xp;
 
-    // Header
     document.getElementById('bp-current-level').textContent = currentLevel;
     document.getElementById('bp-current-xp').textContent = currentXP;
     document.getElementById('bp-days-remaining').textContent = data.daysRemaining;
@@ -25,7 +23,6 @@ function renderBattlePass() {
     document.getElementById('bp-premium-status').textContent = data.hasPremium ? '👑 Pass Premium Actif' : 'Pass Gratuit';
     document.getElementById('bp-premium-status').classList.toggle('premium-active', data.hasPremium);
 
-    // Progression
     const currentThreshold = BP_XP_THRESHOLDS[currentLevel - 1] || 0;
     const nextThreshold = BP_XP_THRESHOLDS[currentLevel] || null;
     const fill = document.getElementById('bp-progress-fill');
@@ -42,7 +39,7 @@ function renderBattlePass() {
         xpToNext.textContent = `${xpNeeded - xpInLevel} XP pour le niveau ${currentLevel + 1}`;
     }
 
-    // 🎁 Met à jour le bouton "Tout réclamer"
+    // 🎁 Bouton Tout Réclamer
     if (typeof bpUpdateClaimAllButton === 'function') bpUpdateClaimAllButton();
 
     // Grille
@@ -60,7 +57,6 @@ function renderBattlePass() {
         const column = document.createElement('div');
         column.className = 'bp-column' + (isUnlocked ? ' unlocked' : '') + (isCurrent ? ' current' : '');
 
-        // Carte Premium
         const premiumCard = document.createElement('div');
         premiumCard.className = 'bp-slot premium-slot';
         if (!premiumOwned) premiumCard.classList.add('locked');
@@ -80,7 +76,6 @@ function renderBattlePass() {
             premiumCard.addEventListener('click', () => claimLevel(level, 'premium'));
         }
 
-        // Carte Gratuite
         const freeCard = document.createElement('div');
         freeCard.className = 'bp-slot free-slot';
         if (freeClaimed) freeCard.classList.add('claimed');
@@ -98,7 +93,6 @@ function renderBattlePass() {
             freeCard.addEventListener('click', () => claimLevel(level, 'free'));
         }
 
-        // Numéro de niveau
         const levelNumber = document.createElement('div');
         levelNumber.className = 'bp-column-level';
         levelNumber.textContent = level;
@@ -110,7 +104,6 @@ function renderBattlePass() {
         grid.appendChild(column);
     });
 
-    // Auto-scroll au premier chargement
     setTimeout(() => {
         if (!bpHasAutoScrolled) {
             bpHasAutoScrolled = true;
@@ -169,30 +162,15 @@ function showBPMessage(text, type) {
     setTimeout(() => { msg.textContent = ''; msg.className = 'bp-message'; }, 3500);
 }
 
-// ============================================
-//   INIT — Attache le bouton "Tout réclamer"
-// ============================================
 document.addEventListener('DOMContentLoaded', () => {
     bpHasAutoScrolled = false;
-
-    // 🎁 Attache l'écouteur par JS (plus fiable que onclick inline)
-    const claimAllBtn = document.getElementById('bp-claim-all-btn');
-    if (claimAllBtn) {
-        claimAllBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🎁 Bouton TOUT RÉCLAMER cliqué');
-            if (typeof bpClaimAllRewards === 'function') {
-                bpClaimAllRewards();
-            } else {
-                console.error('❌ bpClaimAllRewards non trouvée');
-                alert('Erreur : fonction introuvable. Vérifie que battle-pass.js est bien chargé.');
-            }
-        });
-    } else {
-        console.warn('⚠️ Bouton bp-claim-all-btn introuvable dans le DOM');
-    }
-
     renderBattlePass();
     window.addEventListener('storage', renderBattlePass);
+
+    // 🧪 DEBUG : vérifier que la fonction existe
+    console.log('=== DEBUG BATTLE PASS ===');
+    console.log('bpClaimAllRewards existe ?', typeof bpClaimAllRewards);
+    console.log('bpGetAvailableRewards existe ?', typeof bpGetAvailableRewards);
+    console.log('Bouton trouvé ?', !!document.getElementById('bp-claim-all-btn'));
+    console.log('=========================');
 });
