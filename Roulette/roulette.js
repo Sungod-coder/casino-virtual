@@ -48,12 +48,28 @@ function playSpinSound() {
 }
 function stopSpinSound() {
     try {
-        if (!spinSound.paused) {
-            const fade = setInterval(() => {
-                if (spinSound.volume > 0.05) spinSound.volume -= 0.05;
-                else { clearInterval(fade); spinSound.pause(); spinSound.currentTime = 0; spinSound.volume = 0.6; }
-            }, 40);
-        }
+        if (!spinSound) return;
+        // 🔇 Fade rapide
+        const fade = setInterval(() => {
+            if (spinSound.volume > 0.05) {
+                spinSound.volume = Math.max(0, spinSound.volume - 0.1);
+            } else {
+                clearInterval(fade);
+                spinSound.pause();
+                spinSound.currentTime = 0;
+                spinSound.volume = 0.6;
+            }
+        }, 30);
+
+        // 🛑 Sécurité : force l'arrêt après 500ms max
+        setTimeout(() => {
+            try {
+                clearInterval(fade);
+                spinSound.pause();
+                spinSound.currentTime = 0;
+                spinSound.volume = 0.6;
+            } catch (e) {}
+        }, 500);
     } catch (e) {}
 }
 
