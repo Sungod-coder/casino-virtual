@@ -19,9 +19,6 @@
     flex-direction: column;
 }
 
-/* ============================================
-   BOUTON RETOUR
-   ============================================ */
 .bp-body .btn-back-shop {
     display: inline-flex;
     align-items: center;
@@ -45,9 +42,6 @@
     transform: translateX(-3px);
 }
 
-/* ============================================
-   HEADER SAISON
-   ============================================ */
 .bp-header {
     display: flex;
     flex-wrap: wrap;
@@ -140,9 +134,6 @@
     color: #ff66a3;
 }
 
-/* ============================================
-   PROGRESSION
-   ============================================ */
 .bp-progress-wrap {
     background: linear-gradient(135deg, #1a0933, #2b0a4a);
     border: 2px solid rgba(241, 196, 15, 0.4);
@@ -219,8 +210,73 @@
 }
 
 /* ============================================
-   TRACK (style Brawl Stars)
+   BOUTON "TOUT RÉCLAMER"
    ============================================ */
+.bp-claim-all-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+}
+
+.bp-claim-all-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 36px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    border: 3px solid #fff;
+    border-radius: 50px;
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 25px rgba(46, 204, 113, 0.6);
+    text-transform: uppercase;
+    animation: bpClaimAllPulse 2s infinite;
+}
+
+.bp-claim-all-btn:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 35px rgba(46, 204, 113, 1);
+}
+
+.bp-claim-all-btn:active:not(:disabled) {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.bp-claim-all-btn:disabled {
+    background: #444;
+    color: #888;
+    border-color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+    animation: none;
+    opacity: 0.7;
+}
+
+@keyframes bpClaimAllPulse {
+    0%, 100% { box-shadow: 0 6px 25px rgba(46, 204, 113, 0.6); }
+    50% { box-shadow: 0 6px 35px rgba(46, 204, 113, 1), 0 0 40px rgba(46, 204, 113, 0.6); }
+}
+
+.bp-claim-all-count {
+    font-size: 0.85rem;
+    color: #b39ddb;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.bp-claim-all-count strong {
+    color: #2ecc71;
+    font-weight: 900;
+}
+
 .bp-scroll-container {
     overflow-x: auto;
     padding: 18px 0 25px;
@@ -256,7 +312,6 @@
     margin: 0 auto;
 }
 
-/* Labels Premium / Gratuit */
 .bp-labels {
     display: flex;
     flex-direction: column;
@@ -291,7 +346,6 @@
     box-shadow: 0 4px 15px rgba(241, 196, 15, 0.6);
 }
 
-/* Grille de colonnes */
 .bp-grid {
     display: flex;
     gap: 10px;
@@ -316,7 +370,6 @@
     filter: none;
 }
 
-/* Slot */
 .bp-slot {
     background: #0d0f1b;
     border: 2px solid #4a1570;
@@ -425,7 +478,6 @@
     z-index: 2;
 }
 
-/* Numéro de niveau */
 .bp-column-level {
     background: linear-gradient(135deg, #f1c40f, #d35400);
     color: #111;
@@ -456,7 +508,6 @@
     color: #fff;
 }
 
-/* Coin dans les slots */
 .bp-slot-text .coin,
 .bp-slot-text .coin.small {
     width: 14px;
@@ -481,9 +532,6 @@
     margin-left: 3px;
 }
 
-/* ============================================
-   MESSAGES
-   ============================================ */
 .bp-message {
     text-align: center;
     margin-top: 18px;
@@ -495,9 +543,6 @@
 .bp-message.success { color: #2ecc71; }
 .bp-message.error { color: #e74c3c; }
 
-/* ============================================
-   POPUPS
-   ============================================ */
 .xp-popup {
     position: fixed;
     top: 80px;
@@ -556,9 +601,6 @@
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-/* ============================================
-   TICKETS
-   ============================================ */
 .tickets-box {
     display: inline-flex;
     align-items: center;
@@ -575,6 +617,86 @@
 
 .tickets-icon { font-size: 1.05rem; }
 .tickets-value { color: #ff66a3; font-weight: 900; }
+
+/* ============================================
+   OVERLAY + POPUP RANK UP (chargé partout)
+   ============================================ */
+.rankup-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: radial-gradient(circle at center, rgba(30, 10, 50, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%) !important;
+    z-index: 2147483646 !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.rankup-overlay.visible {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.rankup-popup {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(0.3);
+    background: linear-gradient(135deg, #1a0933, #2b0a4a) !important;
+    border: 3px solid #f1c40f !important;
+    border-radius: 24px !important;
+    padding: 30px 50px !important;
+    text-align: center !important;
+    z-index: 2147483647 !important;
+    box-shadow: 0 0 80px rgba(241, 196, 15, 0.9), 0 0 120px rgba(241, 196, 15, 0.5) !important;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.5, 0, 0.3, 1.4);
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 14px !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.rankup-popup.show {
+    opacity: 1 !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+    animation: rankupShine 1.5s ease-in-out infinite alternate;
+}
+
+.rankup-popup.fade-out {
+    opacity: 0 !important;
+    transform: translate(-50%, -50%) scale(0.9) !important;
+}
+
+.rankup-popup .rankup-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rankup-popup .rankup-title {
+    font-size: 1.2rem !important;
+    color: #f1c40f !important;
+    letter-spacing: 3px !important;
+    font-weight: 900 !important;
+    text-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+}
+
+.rankup-popup .rankup-name {
+    font-size: 2rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 3px !important;
+    text-shadow: 0 0 20px currentColor;
+}
+
+@keyframes rankupShine {
+    from { box-shadow: 0 0 60px rgba(241, 196, 15, 0.8), 0 0 100px rgba(241, 196, 15, 0.4); }
+    to   { box-shadow: 0 0 100px rgba(241, 196, 15, 1), 0 0 160px rgba(255, 0, 122, 0.7); }
+}
 
 /* ============================================
    RESPONSIVE
@@ -735,6 +857,16 @@
         font-size: 0.72rem;
     }
 
+    .bp-claim-all-btn {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    .bp-claim-all-count {
+        font-size: 0.75rem;
+    }
+
     .bp-scroll-container {
         padding: 12px 0 18px;
         border-radius: 16px;
@@ -760,7 +892,7 @@
         gap: 2px;
     }
 
-        .bp-slot-icon {
+    .bp-slot-icon {
         font-size: 1.5rem;
         line-height: 1;
         display: flex;
@@ -769,20 +901,13 @@
         min-height: 1.5rem;
     }
 
-    .bp-slot-text .coin,
-    .bp-slot-text .coin.small {
-        display: inline-flex !important;
-        width: 14px;
-        height: 14px;
-        font-size: 0.55rem;
-    }
-
     .bp-slot-text {
         font-size: 0.6rem;
     }
 
     .bp-slot-text .coin,
     .bp-slot-text .coin.small {
+        display: inline-flex !important;
         width: 11px;
         height: 11px;
         font-size: 0.45rem;
@@ -835,6 +960,14 @@
         font-size: 0.8rem;
         padding: 5px 10px;
     }
+
+    .rankup-popup {
+        padding: 22px 28px !important;
+        margin: 0 15px !important;
+        max-width: calc(100vw - 30px) !important;
+    }
+    .rankup-popup .rankup-title { font-size: 1rem !important; letter-spacing: 2px !important; }
+    .rankup-popup .rankup-name { font-size: 1.4rem !important; letter-spacing: 2px !important; }
 }
 
 @media (max-width: 400px) {
@@ -851,7 +984,7 @@
     }
 
     .bp-slot-icon {
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
 
     .bp-slot-text {
@@ -862,96 +995,4 @@
         font-size: 0.55rem;
         padding: 5px 8px;
     }
-}
-
-/* ============================================
-   OVERLAY + POPUP RANK UP — Chargé PARTOUT
-   (jeux, lobby, boutique, battle-pass)
-   ============================================ */
-
-.rankup-overlay {
-    position: fixed !important;
-    inset: 0 !important;
-    background: radial-gradient(circle at center, rgba(30, 10, 50, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%) !important;
-    z-index: 2147483646 !important;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s ease;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
-
-.rankup-overlay.visible {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-.rankup-popup {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) scale(0.3);
-    background: linear-gradient(135deg, #1a0933, #2b0a4a) !important;
-    border: 3px solid #f1c40f !important;
-    border-radius: 24px !important;
-    padding: 30px 50px !important;
-    text-align: center !important;
-    z-index: 2147483647 !important;
-    box-shadow: 0 0 80px rgba(241, 196, 15, 0.9), 0 0 120px rgba(241, 196, 15, 0.5) !important;
-    opacity: 0;
-    transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.5, 0, 0.3, 1.4);
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 14px !important;
-    pointer-events: none !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-}
-
-.rankup-popup.show {
-    opacity: 1 !important;
-    transform: translate(-50%, -50%) scale(1) !important;
-    animation: rankupShine 1.5s ease-in-out infinite alternate;
-}
-
-.rankup-popup.fade-out {
-    opacity: 0 !important;
-    transform: translate(-50%, -50%) scale(0.9) !important;
-}
-
-.rankup-popup .rankup-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.rankup-popup .rankup-title {
-    font-size: 1.2rem !important;
-    color: #f1c40f !important;
-    letter-spacing: 3px !important;
-    font-weight: 900 !important;
-    text-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
-}
-
-.rankup-popup .rankup-name {
-    font-size: 2rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 3px !important;
-    text-shadow: 0 0 20px currentColor;
-}
-
-@keyframes rankupShine {
-    from { box-shadow: 0 0 60px rgba(241, 196, 15, 0.8), 0 0 100px rgba(241, 196, 15, 0.4); }
-    to   { box-shadow: 0 0 100px rgba(241, 196, 15, 1), 0 0 160px rgba(255, 0, 122, 0.7); }
-}
-
-@media (max-width: 600px) {
-    .rankup-popup {
-        padding: 22px 28px !important;
-        margin: 0 15px !important;
-        max-width: calc(100vw - 30px) !important;
-    }
-    .rankup-popup .rankup-title { font-size: 1rem !important; letter-spacing: 2px !important; }
-    .rankup-popup .rankup-name { font-size: 1.4rem !important; letter-spacing: 2px !important; }
 }
