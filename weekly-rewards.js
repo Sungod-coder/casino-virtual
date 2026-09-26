@@ -1,8 +1,5 @@
 // weekly-rewards.js
 // Système de récompenses hebdomadaires avec STREAK STRICT
-// - Il faut réclamer la récompense suivante dans les 24h après le dernier claim
-// - Si tu laisses passer +48h sans réclamer → la série se reset à 0
-// - Les jours ne s'accumulent jamais
 
 const WEEKLY_REWARDS = [
     { day: 1, type: 'tokens',     amount: 25,   icon: '🪙', label: '25' },
@@ -17,17 +14,13 @@ const WEEKLY_REWARDS = [
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 const WEEK_MS = 7 * DAY_MS;
-
-// ⏱️ Fenêtre de tolérance : tu as 24h pour réclamer le jour suivant
-// Si tu dépasses 48h depuis ton dernier claim → reset
-const CLAIM_WINDOW_MS = DAY_MS;      // 24h de fenêtre après débloquage
-const STREAK_BREAK_MS = 2 * DAY_MS;  // 48h sans claim → reset
+const CLAIM_WINDOW_MS = DAY_MS;
+const STREAK_BREAK_MS = 2 * DAY_MS;
 
 function getWeeklyUsers() { return JSON.parse(localStorage.getItem('casino_users')) || {}; }
 function saveWeeklyUsers(users) { localStorage.setItem('casino_users', JSON.stringify(users)); }
 function getWeeklyEmail() { return localStorage.getItem('casino_logged_email'); }
 
-// Formatte un temps restant en "23h 45m" ou "12m 30s"
 function formatTimeRemaining(ms) {
     if (ms <= 0) return '';
     const hours = Math.floor(ms / HOUR_MS);
@@ -38,26 +31,24 @@ function formatTimeRemaining(ms) {
     return `${seconds}s`;
 }
 
-// ✅ Reset complet de la semaine
-function resetWeeklyForUser(email) {
-    const users = getWeeklyUsers();
-    if (!users[email]) return;
-    users[email].weekly = {
-        weekStartDate: Date.now(),
-        lastClaimTime: null,
-        claimed: []
-    };
-    saveWeeklyUsers(users);
+// ✅ Retourne la date du jour à minuit (00:00:00) - pour comparer par JOUR CALENDAIRE
+function getStartOfDay(timestamp) {
+    const d = new Date(timestamp);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
 }
 
-// ✅ Charge les données hebdo avec les règles de reset
+// ✅ Vérifie si deux timestamps sont dans le même jour calendaire
+function isSameDay(ts1, ts2) {
+    return getStartOfDay(ts1) === getStartOfDay(ts2);
+}
+
 function getWeeklyData() {
     const email = getWeeklyEmail();
     if (!email) return null;
     const users = getWeeklyUsers();
     if (!users[email]) return null;
 
-    // Initialisation
     if (!users[email].weekly) {
         users[email].weekly = {
             weekStartDate: Date.now(),
@@ -95,25 +86,23 @@ function getWeeklyData() {
     return users[email].weekly;
 }
 
-// ✅ Retourne l'index du prochain jour à réclamer (1-7) ou 8 si tout est réclamé
 function getNextDayToClaim(w) {
     return w.claimed.length + 1;
 }
 
-// ✅ Vérifie si un jour donné est disponible
+// ✅ CORRIGÉ : utilise le jour CALENDAIRE, pas un délai de 24h glissant
 function isDayAvailable(w, day) {
-    // Doit être exactement le prochain jour de la série
     if (day !== getNextDayToClaim(w)) return false;
 
-    // Jour 1 : dispo immédiatement après reset
+    // Jour 1 : dispo immédiatement
     if (w.claimed.length === 0) return true;
 
-    // Autres jours : 24h doivent s'être écoulées depuis le dernier claim
+    // Autres jours : il faut être dans un jour calendaire DIFFÉRENT du dernier claim
     if (!w.lastClaimTime) return false;
-    return (Date.now() - w.lastClaimTime) >= DAY_MS;
+
+    return !isSameDay(Date.now(), w.lastClaimTime);
 }
 
-// ✅ Vérifie si le jour est complètement verrouillé (pas encore atteint)
 function isDayLocked(w, day) {
     if (w.claimed.includes(day)) return false;
     if (day === getNextDayToClaim(w)) {
@@ -122,15 +111,14 @@ function isDayLocked(w, day) {
     return true;
 }
 
-// ✅ Temps avant déblocage du prochain jour
+// ⏳ Temps avant minuit (prochain jour calendaire)
 function getTimeUntilUnlock(w) {
     if (w.claimed.length === 0) return 0;
     if (!w.lastClaimTime) return 0;
-    const unlockTime = w.lastClaimTime + DAY_MS;
-    return Math.max(0, unlockTime - Date.now());
+    const tomorrow = getStartOfDay(w.lastClaimTime) + DAY_MS;
+    return Math.max(0, tomorrow - Date.now());
 }
 
-// ✅ Temps restant avant reset de la série (48h depuis le dernier claim)
 function getTimeBeforeStreakBreak(w) {
     if (w.claimed.length === 0 || w.claimed.length >= 7) return Infinity;
     if (!w.lastClaimTime) return Infinity;
@@ -148,50 +136,51 @@ function claimWeeklyReward(day) {
     const w = getWeeklyData();
     if (!w) return { ok: false, msg: 'Erreur' };
 
-    // Vérifier que c'est bien le prochain jour
     if (day !== getNextDayToClaim(w)) {
         return { ok: false, msg: '⚠️ Tu dois réclamer les jours dans l\'ordre' };
     }
 
-    // Vérifier que le jour est disponible
     if (!isDayAvailable(w, day)) {
         const remaining = getTimeUntilUnlock(w);
         return { ok: false, msg: `⏳ Disponible dans ${formatTimeRemaining(remaining)}` };
     }
+
+    // Recharge les users frais (au cas où getWeeklyData a reset)
+    const freshUsers = getWeeklyUsers();
+    const u = freshUsers[email];
+    if (!u.weekly) u.weekly = w;
 
     const reward = WEEKLY_REWARDS.find(r => r.day === day);
     if (!reward) return { ok: false, msg: 'Récompense inconnue' };
 
     // Applique la récompense
     if (reward.type === 'tokens') {
-        users[email].balance = (users[email].balance || 0) + reward.amount;
-        localStorage.setItem('casinoBalance', users[email].balance.toString());
+        u.balance = (u.balance || 0) + reward.amount;
+        localStorage.setItem('casinoBalance', u.balance.toString());
     } else if (reward.type === 'ticket') {
-        users[email].tickets = (users[email].tickets || 0) + reward.amount;
+        u.tickets = (u.tickets || 0) + reward.amount;
     } else if (reward.type === 'potion-x2') {
-        if (!users[email].inventory) users[email].inventory = {};
-        users[email].inventory['potion-x2'] = (users[email].inventory['potion-x2'] || 0) + reward.amount;
+        if (!u.inventory) u.inventory = {};
+        u.inventory['potion-x2'] = (u.inventory['potion-x2'] || 0) + reward.amount;
     } else if (reward.type === 'chest') {
-        users[email].weekly.claimed.push(day);
-        users[email].weekly.lastClaimTime = Date.now();
-        saveWeeklyUsers(users);
-        renderWeeklyRewards();
+        u.weekly.claimed.push(day);
+        u.weekly.lastClaimTime = Date.now();
+        saveWeeklyUsers(freshUsers);
+        if (typeof renderWeeklyRewards === 'function') renderWeeklyRewards();
         if (typeof updateDisplayBalance === 'function') updateDisplayBalance();
         if (typeof refreshBPTicketsUI === 'function') refreshBPTicketsUI();
         if (typeof potionUpdateUI === 'function') potionUpdateUI();
-
-        closeWeeklyModal();
+        if (typeof closeWeeklyModal === 'function') closeWeeklyModal();
         setTimeout(() => {
             if (typeof openChest === 'function') openChest();
         }, 400);
-
         return { ok: true, reward };
     }
 
     // Enregistre le claim
-    users[email].weekly.claimed.push(day);
-    users[email].weekly.lastClaimTime = Date.now();
-    saveWeeklyUsers(users);
+    u.weekly.claimed.push(day);
+    u.weekly.lastClaimTime = Date.now();
+    saveWeeklyUsers(freshUsers);
 
     if (typeof updateDisplayBalance === 'function') updateDisplayBalance();
     if (typeof refreshBPTicketsUI === 'function') refreshBPTicketsUI();
@@ -211,22 +200,16 @@ function renderWeeklyRewards() {
         return;
     }
 
-    // ✅ Si les 7 jours sont tous réclamés → on cache le bouton
     const allClaimed = w.claimed.length >= 7;
 
     if (weeklyBtn) {
-        if (allClaimed) {
-            weeklyBtn.style.display = 'none';
-        } else {
-            weeklyBtn.style.display = 'flex';
-        }
+        weeklyBtn.style.display = allClaimed ? 'none' : 'flex';
     }
 
-    if (allClaimed) {
+    if (allClaimed && typeof closeWeeklyModal === 'function') {
         closeWeeklyModal();
     }
 
-    // Met à jour le badge (affiche 1 si le prochain jour est dispo, 0 sinon)
     const badge = document.getElementById('weekly-btn-badge');
     if (badge) {
         const nextDay = getNextDayToClaim(w);
@@ -239,7 +222,6 @@ function renderWeeklyRewards() {
         }
     }
 
-    // Rendu des cartes
     container.innerHTML = '';
     WEEKLY_REWARDS.forEach(reward => {
         const claimed = w.claimed.includes(reward.day);
@@ -256,13 +238,11 @@ function renderWeeklyRewards() {
         const card = document.createElement('div');
         card.className = cardClass;
 
-        // ✅ Coin doré M pour les jetons, emoji sinon
         const isTokens = reward.type === 'tokens';
         const iconHTML = isTokens
             ? `<div class="weekly-icon coin-icon"><span class="coin large">M</span></div>`
             : `<div class="weekly-icon">${reward.icon}</div>`;
 
-        // Infos du timer
         let timerInfo = '';
         if (isNext && !available && !claimed) {
             const remaining = getTimeUntilUnlock(w);
@@ -342,5 +322,5 @@ document.addEventListener('click', (e) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     renderWeeklyRewards();
-    setInterval(renderWeeklyRewards, 1000);
+    setInterval(renderWeeklyRewards, 30000); // ⏱️ Toutes les 30s au lieu de 1s (perf)
 });
