@@ -175,7 +175,6 @@ function setupEventListeners() {
                 customInput.classList.remove('active');
             }
 
-            // Si une couleur est déjà sélectionnée → on remplace la mise
             if (currentBet.color) {
                 currentBet.amount = currentChipValue;
                 updateUI();
@@ -183,7 +182,7 @@ function setupEventListeners() {
         });
     });
 
-    // ----- CHAMP CUSTOM -----
+    // ----- CHAMP CUSTOM (le petit cercle vide à droite du 500) -----
     const customInput = document.getElementById('custom-bet-input');
     if (customInput) {
         customInput.addEventListener('focus', () => {
@@ -198,7 +197,6 @@ function setupEventListeners() {
             if (isNaN(val) || val < 1) return;
             currentChipValue = val;
 
-            // Si une couleur est sélectionnée → mise = valeur custom
             if (currentBet.color) {
                 currentBet.amount = val;
                 const labels = { red: 'ROUGE', black: 'NOIR', green: 'VERT' };
@@ -217,7 +215,7 @@ function setupEventListeners() {
         });
     }
 
-    // ----- BET SPOTS (Couleurs) -----
+    // ----- BET SPOTS (couleurs) -----
     document.querySelectorAll('.bet-spot').forEach(spot => {
         spot.addEventListener('click', () => {
             if (isSpinning || inStreak) return;
@@ -285,4 +283,18 @@ function reloadBalance() {
 function clearBet() {
     if (isSpinning || inStreak) return;
     currentBet = { color: null, amount: 0 };
-    const customInput = document.getElementById
+    const customInput = document.getElementById('custom-bet-input');
+    if (customInput) {
+        customInput.value = '';
+        customInput.classList.remove('active');
+    }
+    showMessage("Mise effacée.");
+    updateUI();
+}
+
+function showMessage(msg) { const b = document.getElementById('message-box'); if (b) b.innerText = msg; }
+
+function draw(wAngle, bAngle, bRadius) {
+    if (!ctx) return;
+    const totalSlots = NUMBERS_LAYOUT.length;
+    const arc = (2 * Math.PI) / totalSl
