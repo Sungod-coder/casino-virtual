@@ -47,11 +47,11 @@ const BP_REWARDS = (function() {
         { type: 'potion-x2', amount: 2 },
         { type: 'tokens', amount: 250 },
         { type: 'tokens', amount: 500 },
-        { type: 'potion-x5', amount: 1 },
+        { type: 'potion-x2', amount: 3 },
         { type: 'tokens', amount: 1000 },
         { type: 'tokens', amount: 750 },
         { type: 'tokens', amount: 500 },
-        { type: 'potion-x5', amount: 1 },
+        { type: 'potion-x2', amount: 3 },
         { type: 'tokens', amount: 1500 }
     ];
 
@@ -63,7 +63,7 @@ const BP_REWARDS = (function() {
         } else if (level === BP_MAX_LEVEL) {
             free = { type: 'tokens', amount: 10000 };
         } else if (level % 25 === 0) {
-            free = { type: 'potion-x5', amount: 3 };
+            free = { type: 'potion-x2', amount: 5 };
         } else if (level % 10 === 0) {
             free = { type: 'tokens', amount: 1000 };
         } else if (level % 5 === 0) {
@@ -77,11 +77,11 @@ const BP_REWARDS = (function() {
         } else if (level === BP_MAX_LEVEL) {
             premium = { type: 'tokens', amount: 100000 };
         } else if (level % 25 === 0) {
-            premium = { type: 'potion-x5', amount: 10 };
+            premium = { type: 'potion-x2', amount: 15 };
         } else if (level % 10 === 0) {
             premium = { type: 'tokens', amount: 5000 };
         } else if (level % 5 === 0) {
-            premium = { type: 'potion-x5', amount: 2 };
+            premium = { type: 'potion-x2', amount: 4 };
         } else {
             premium = premiumTemplates[(level - 1) % premiumTemplates.length];
         }
