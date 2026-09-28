@@ -131,7 +131,6 @@ function getRewardIcon(reward) {
     if (reward.type === 'tokens') return '';
     if (reward.type === 'ticket') return '🎫';
     if (reward.type === 'potion-x2') return '🧪';
-    if (reward.type === 'potion-x5') return '⚗️';
     return '?';
 }
 
