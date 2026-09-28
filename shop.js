@@ -1,10 +1,8 @@
 // shop.js
 // Boutique + Coffre avec animation de défilement style CS:GO
-// + son synchronisé avec volume réduit
 
 const SHOP_ITEMS = {
     'potion-x2':     { name: 'Potion Chance x2',       price: 1500,  unique: false },
-    'potion-x5':     { name: 'Potion Chance x5',       price: 3750,  unique: false },
     'mystery-chest': { name: 'Coffre Mystère',         price: 7500,  unique: false },
     'battle-pass':   { name: 'Pass Combat Premium',    price: 12000, unique: true  }
 };
@@ -16,7 +14,6 @@ const CHEST_REWARDS = [
     { type: 'potion-pack',  chance: 8,                  label: 'Pack Potions',  color: '#9b59b6', rarity: 'rare',      icon: '🎒', short: '3x x2 + 2x x5' },
     { type: 'ticket',       amount: 2,     chance: 6,   label: '2 Tickets',     color: '#ff66a3', rarity: 'rare',      icon: '🎫', short: '2 tickets' },
     { type: 'ticket',       amount: 1,     chance: 10,  label: '1 Ticket',      color: '#ff66a3', rarity: 'uncommon',  icon: '🎫', short: '1 ticket' },
-    { type: 'potion-x5',    amount: 1,     chance: 8,   label: '1 Potion x5',   color: '#ff66a3', rarity: 'uncommon',  icon: '⚗️', short: '1 potion x5' },
     { type: 'potion-x2',    amount: 2,     chance: 10,  label: '2 Potions x2',  color: '#f1c40f', rarity: 'uncommon',  icon: '🧪', short: '2 potions x2' },
     { type: 'potion-x2',    amount: 1,     chance: 15,  label: '1 Potion x2',   color: '#f1c40f', rarity: 'common',    icon: '🧪', short: '1 potion x2' },
     { type: 'tokens',       amount: 5000,  chance: 10,  label: '5 000 jetons',  color: '#2ecc71', rarity: 'rare',      icon: '🪙', short: '5 000 jetons' },
@@ -33,9 +30,6 @@ function drawChestReward() {
     return CHEST_REWARDS[CHEST_REWARDS.length - 1];
 }
 
-// ============================================================
-//   COURBE CUBIC-BEZIER (identique au CSS)
-// ============================================================
 function bezierCalc(t, p1, p2) {
     const mt = 1 - t;
     return 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t;
@@ -59,9 +53,6 @@ function cubicBezierY(x, p1x, p1y, p2x, p2y) {
     return bezierCalc(t, p1y, p2y);
 }
 
-// ============================================================
-//   ACCÈS DONNÉES
-// ============================================================
 function shopGetUsers() { return JSON.parse(localStorage.getItem('casino_users')) || {}; }
 function shopSaveUsers(users) { localStorage.setItem('casino_users', JSON.stringify(users)); }
 function shopGetEmail() { return localStorage.getItem('casino_logged_email'); }
@@ -108,9 +99,6 @@ function shopSetInventoryItem(itemKey, value) {
     }
 }
 
-// ============================================================
-//   MESSAGE
-// ============================================================
 function shopShowMessage(text, type = 'success') {
     const msg = document.getElementById('shop-message');
     if (!msg) return;
@@ -123,9 +111,6 @@ function shopShowMessage(text, type = 'success') {
     }, 3000);
 }
 
-// ============================================================
-//   OUVERTURE DU COFFRE — Animation CS:GO
-// ============================================================
 function openChest() {
     const winner = drawChestReward();
 
@@ -255,8 +240,7 @@ function getRewardText(reward) {
     if (reward.type === 'ticket') return `<strong style="color:${reward.color}">${reward.amount} Ticket${reward.amount > 1 ? 's' : ''} de Tirage</strong>`;
     if (reward.type === 'multi-ticket') return `<strong style="color:${reward.color}">Tickets de Tirage (voir ci-dessus)</strong>`;
     if (reward.type === 'potion-x2') return `<strong style="color:${reward.color}">${reward.amount}x Potions Chance x2</strong>`;
-    if (reward.type === 'potion-x5') return `<strong style="color:${reward.color}">${reward.amount}x Potions Chance x5</strong>`;
-    if (reward.type === 'potion-pack') return `<strong style="color:${reward.color}">3x Potions x2 + 2x Potions x5</strong>`;
+    if (reward.type === 'potion-pack') return `<strong style="color:${reward.color}">3x Potions x2</strong>`;
     return '';
 }
 
@@ -274,13 +258,12 @@ function applyChestReward(reward) {
     } else if (reward.type === 'multi-ticket') {
         const n = Math.floor(Math.random() * (reward.max - reward.min + 1)) + reward.min;
         u.tickets = (u.tickets || 0) + n;
-    } else if (reward.type === 'potion-x2' || reward.type === 'potion-x5') {
+    } else if (reward.type === 'potion-x2') {
         if (!u.inventory) u.inventory = {};
-        u.inventory[reward.type] = (u.inventory[reward.type] || 0) + reward.amount;
+        u.inventory['potion-x2'] = (u.inventory['potion-x2'] || 0) + reward.amount;
     } else if (reward.type === 'potion-pack') {
         if (!u.inventory) u.inventory = {};
         u.inventory['potion-x2'] = (u.inventory['potion-x2'] || 0) + 3;
-        u.inventory['potion-x5'] = (u.inventory['potion-x5'] || 0) + 2;
     }
 
     shopSaveUsers(users);
@@ -294,9 +277,6 @@ function closeChestOverlay() {
     if (overlay) overlay.classList.remove('visible');
 }
 
-// ============================================================
-//   ACHAT
-// ============================================================
 function shopBuy(itemKey) {
     const item = SHOP_ITEMS[itemKey];
     if (!item) return;
@@ -335,9 +315,6 @@ function shopBuy(itemKey) {
     shopUpdateUI();
 }
 
-// ============================================================
-//   UI
-// ============================================================
 function shopUpdateUI() {
     const balance = shopGetBalance();
     const inventory = shopGetInventory();
@@ -361,9 +338,6 @@ function shopUpdateUI() {
     });
 }
 
-// ============================================================
-//   INITIALISATION
-// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.shop-btn').forEach(btn => {
         btn.addEventListener('click', () => {
