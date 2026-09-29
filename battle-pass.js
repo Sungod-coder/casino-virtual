@@ -1,19 +1,54 @@
 // battle-pass.js
-const BP_MAX_LEVEL = 100;
-const BP_SEASON_DURATION_DAYS = 60;
+// Pass de Combat — Saisons dynamiques de 30 jours
 
+const BP_MAX_LEVEL = 100;
+const BP_SEASON_DURATION_DAYS = 30;
+// 🗓️ Epoch : début de la Saison 1 = 25/09/2026 à 00:00 UTC
+const BP_SEASON_EPOCH = new Date('2026-09-25T00:00:00Z').getTime();
+const BP_SEASON_DURATION_MS = BP_SEASON_DURATION_DAYS * 24 * 60 * 60 * 1000;
+
+// ============================================
+//   SYSTÈME DE SAISONS
+// ============================================
+function bpGetCurrentSeasonNumber() {
+    const elapsed = Date.now() - BP_SEASON_EPOCH;
+    if (elapsed < 0) return 1;
+    return Math.floor(elapsed / BP_SEASON_DURATION_MS) + 1;
+}
+
+function bpGetSeasonStartFor(seasonNum) {
+    return BP_SEASON_EPOCH + (seasonNum - 1) * BP_SEASON_DURATION_MS;
+}
+
+function bpGetSeasonEndFor(seasonNum) {
+    return BP_SEASON_EPOCH + seasonNum * BP_SEASON_DURATION_MS;
+}
+
+function bpGetDaysRemaining() {
+    const seasonNum = bpGetCurrentSeasonNumber();
+    const end = bpGetSeasonEndFor(seasonNum);
+    return Math.ceil(Math.max(0, (end - Date.now()) / (1000 * 60 * 60 * 24)));
+}
+
+function bpGetSeasonLabel() {
+    return `SAISON ${bpGetCurrentSeasonNumber()}`;
+}
+
+// ============================================
+//   XP PAR PALIER
+// ============================================
 function getXPForLevel(level) {
     if (level >= 100) return 0;
-    if (level < 10)   return 100;
-    if (level < 20)   return 500;
-    if (level < 30)   return 1000;
-    if (level < 40)   return 2500;
-    if (level < 50)   return 5000;
-    if (level < 60)   return 10000;
-    if (level < 70)   return 20000;
-    if (level < 80)   return 40000;
-    if (level < 90)   return 75000;
-    return 150000;
+    if (level < 10)   return 300;
+    if (level < 20)   return 1500;
+    if (level < 30)   return 3000;
+    if (level < 40)   return 7500;
+    if (level < 50)   return 15000;
+    if (level < 60)   return 30000;
+    if (level < 70)   return 60000;
+    if (level < 80)   return 120000;
+    if (level < 90)   return 225000;
+    return 450000;
 }
 
 const BP_XP_THRESHOLDS = (function() {
@@ -24,6 +59,9 @@ const BP_XP_THRESHOLDS = (function() {
     return arr;
 })();
 
+// ============================================
+//   RÉCOMPENSES
+// ============================================
 const BP_REWARDS = (function() {
     const rewards = [];
     const FREE_TICKET_LEVELS    = [15, 30, 45, 60, 75];
@@ -91,54 +129,29 @@ const BP_REWARDS = (function() {
     return rewards;
 })();
 
+// ============================================
+//   UTILS
+// ============================================
 function bpGetUsers() { return JSON.parse(localStorage.getItem('casino_users')) || {}; }
 function bpSaveUsers(users) { localStorage.setItem('casino_users', JSON.stringify(users)); }
 function bpGetEmail() { return localStorage.getItem('casino_logged_email'); }
 
-function bpGetSeasonStart() {
-    const stored = localStorage.getItem('bp_season_start');
-    if (stored) {
-        const start = parseInt(stored, 10);
-        if (isNaN(start)) {
-            localStorage.removeItem('bp_season_start');
-            return bpGetSeasonStart();
-        }
-        const now = Date.now();
-        const daysPassed = (now - start) / (1000 * 60 * 60 * 24);
-        if (daysPassed >= BP_SEASON_DURATION_DAYS) {
-            bpResetAllPlayers();
-            const newStart = Date.now();
-            localStorage.setItem('bp_season_start', newStart.toString());
-            return newStart;
-        }
-        return start;
+// ✅ Vérifie et applique le reset de saison SI NÉCESSAIRE
+function bpCheckAndApplySeasonReset(u) {
+    if (!u.bp) {
+        u.bp = { xp: 0, claimedFree: [], claimedPremium: [], season: bpGetCurrentSeasonNumber() };
+        return true;
     }
-    const start = Date.now();
-    localStorage.setItem('bp_season_start', start.toString());
-    return start;
-}
-
-function bpForceNewSeason() {
-    localStorage.removeItem('bp_season_start');
-    bpResetAllPlayers();
-    bpGetSeasonStart();
-    if (typeof renderBattlePass === 'function') renderBattlePass();
-}
-
-function bpGetDaysRemaining() {
-    const start = bpGetSeasonStart();
-    const elapsed = (Date.now() - start) / (1000 * 60 * 60 * 24);
-    return Math.ceil(Math.max(0, BP_SEASON_DURATION_DAYS - elapsed));
-}
-
-function bpResetAllPlayers() {
-    const users = bpGetUsers();
-    for (const email in users) {
-        if (users[email].bp) {
-            users[email].bp = { xp: 0, claimedFree: [], claimedPremium: [] };
-        }
+    if (typeof u.bp.season !== 'number') {
+        u.bp.season = bpGetCurrentSeasonNumber();
     }
-    bpSaveUsers(users);
+    const currentSeason = bpGetCurrentSeasonNumber();
+    if (u.bp.season < currentSeason) {
+        // 🗓️ Nouvelle saison → reset
+        u.bp = { xp: 0, claimedFree: [], claimedPremium: [], season: currentSeason };
+        return true;
+    }
+    return false;
 }
 
 function bpGetData() {
@@ -147,17 +160,20 @@ function bpGetData() {
     const users = bpGetUsers();
     if (!users[email]) return null;
 
-    if (!users[email].bp) users[email].bp = { xp: 0, claimedFree: [], claimedPremium: [] };
-    if (typeof users[email].tickets !== 'number') users[email].tickets = 0;
-    if (!users[email].inventory) users[email].inventory = {};
+    const u = users[email];
+    if (!u.inventory) u.inventory = {};
+    if (typeof u.tickets !== 'number') u.tickets = 0;
 
+    bpCheckAndApplySeasonReset(u);
     bpSaveUsers(users);
+
     return {
-        bp: users[email].bp,
-        tickets: users[email].tickets,
-        inventory: users[email].inventory,
-        hasPremium: !!users[email].inventory['battle-pass'],
-        daysRemaining: bpGetDaysRemaining()
+        bp: u.bp,
+        tickets: u.tickets,
+        inventory: u.inventory,
+        hasPremium: !!u.inventory['battle-pass'],
+        daysRemaining: bpGetDaysRemaining(),
+        seasonNumber: bpGetCurrentSeasonNumber()
     };
 }
 
@@ -178,6 +194,23 @@ function bpGetTickets() {
     return users[email].tickets || 0;
 }
 
+// ✅ Force le passage à une nouvelle saison (debug admin)
+function bpForceNewSeason() {
+    if (!confirm('⚠️ Forcer le reset de la saison en cours pour TOUS les joueurs ?')) return;
+    const users = bpGetUsers();
+    const currentSeason = bpGetCurrentSeasonNumber();
+    for (const email in users) {
+        if (users[email].bp) {
+            users[email].bp = { xp: 0, claimedFree: [], claimedPremium: [], season: currentSeason };
+        }
+    }
+    bpSaveUsers(users);
+    if (typeof renderBattlePass === 'function') renderBattlePass();
+}
+
+// ============================================
+//   XP (Pass + Rang)
+// ============================================
 function addBattlePassXP(amount) {
     if (amount <= 0) return;
     const email = bpGetEmail();
@@ -185,16 +218,16 @@ function addBattlePassXP(amount) {
     const users = bpGetUsers();
     if (!users[email]) return;
 
-    bpGetSeasonStart();
-    if (!users[email].bp) users[email].bp = { xp: 0, claimedFree: [], claimedPremium: [] };
+    const u = users[email];
+    bpCheckAndApplySeasonReset(u);
 
-    const oldLevel = bpGetLevel(users[email].bp.xp);
-    users[email].bp.xp += amount;
-    const newLevel = bpGetLevel(users[email].bp.xp);
+    const oldLevel = bpGetLevel(u.bp.xp);
+    u.bp.xp += amount;
+    const newLevel = bpGetLevel(u.bp.xp);
 
-    if (typeof users[email].rankXP !== 'number') users[email].rankXP = 0;
-    const oldRankXP = users[email].rankXP;
-    users[email].rankXP += amount;
+    if (typeof u.rankXP !== 'number') u.rankXP = 0;
+    const oldRankXP = u.rankXP;
+    u.rankXP += amount;
 
     bpSaveUsers(users);
     showXPGainPopup(amount);
@@ -204,7 +237,7 @@ function addBattlePassXP(amount) {
 
     if (typeof RANKS !== 'undefined' && typeof getCurrentRankIndex === 'function') {
         const oldRankIdx = getCurrentRankIndex(oldRankXP);
-        const newRankIdx = getCurrentRankIndex(users[email].rankXP);
+        const newRankIdx = getCurrentRankIndex(u.rankXP);
         if (newRankIdx > oldRankIdx) {
             if (typeof showRankUpPopup === 'function') {
                 showRankUpPopup(RANKS[newRankIdx]);
@@ -235,13 +268,18 @@ function showLevelUpPopup(level) {
     }, 3000);
 }
 
+// ============================================
+//   RÉCLAMATION
+// ============================================
 function bpClaimReward(level, type) {
     const email = bpGetEmail();
     if (!email) return { ok: false, msg: 'Non connecté' };
 
     const users = bpGetUsers();
     if (!users[email]) return { ok: false, msg: 'Utilisateur inconnu' };
-    if (!users[email].bp) users[email].bp = { xp: 0, claimedFree: [], claimedPremium: [] };
+
+    const u = users[email];
+    bpCheckAndApplySeasonReset(u);
 
     const data = bpGetData();
     if (!data) return { ok: false, msg: 'Erreur données' };
@@ -259,21 +297,21 @@ function bpClaimReward(level, type) {
     if (claimedList.includes(level)) return { ok: false, msg: 'Déjà réclamé' };
 
     const freshUsers = bpGetUsers();
-    const u = freshUsers[email];
+    const fu = freshUsers[email];
+    bpCheckAndApplySeasonReset(fu);
 
     if (reward.type === 'tokens') {
-        u.balance = (u.balance || 0) + reward.amount;
-        localStorage.setItem('casinoBalance', u.balance.toString());
+        fu.balance = (fu.balance || 0) + reward.amount;
+        localStorage.setItem('casinoBalance', fu.balance.toString());
     } else if (reward.type === 'ticket') {
-        u.tickets = (u.tickets || 0) + reward.amount;
+        fu.tickets = (fu.tickets || 0) + reward.amount;
     } else if (reward.type === 'potion-x2' || reward.type === 'potion-x5') {
-        if (!u.inventory) u.inventory = {};
-        u.inventory[reward.type] = (u.inventory[reward.type] || 0) + reward.amount;
+        if (!fu.inventory) fu.inventory = {};
+        fu.inventory[reward.type] = (fu.inventory[reward.type] || 0) + reward.amount;
     }
 
-    if (!u.bp) u.bp = { xp: 0, claimedFree: [], claimedPremium: [] };
-    if (type === 'free') u.bp.claimedFree.push(level);
-    else u.bp.claimedPremium.push(level);
+    if (type === 'free') fu.bp.claimedFree.push(level);
+    else fu.bp.claimedPremium.push(level);
 
     bpSaveUsers(freshUsers);
     refreshBPTicketsUI();
@@ -349,12 +387,11 @@ function bpClaimAllRewards() {
     if (!users[email]) return;
 
     const u = users[email];
-    if (!u.bp) u.bp = { xp: 0, claimedFree: [], claimedPremium: [] };
+    bpCheckAndApplySeasonReset(u);
 
     let tokensGained = 0;
     let ticketsGained = 0;
     let potionsX2 = 0;
-    let potionsX5 = 0;
 
     for (const level of available.free) {
         const rewards = BP_REWARDS.find(r => r.level === level);
@@ -367,14 +404,10 @@ function bpClaimAllRewards() {
         } else if (r.type === 'ticket') {
             u.tickets = (u.tickets || 0) + r.amount;
             ticketsGained += r.amount;
-        } else if (r.type === 'potion-x2') {
+        } else if (r.type === 'potion-x2' || r.type === 'potion-x5') {
             if (!u.inventory) u.inventory = {};
-            u.inventory['potion-x2'] = (u.inventory['potion-x2'] || 0) + r.amount;
-            potionsX2 += r.amount;
-        } else if (r.type === 'potion-x5') {
-            if (!u.inventory) u.inventory = {};
-            u.inventory['potion-x5'] = (u.inventory['potion-x5'] || 0) + r.amount;
-            potionsX5 += r.amount;
+            u.inventory[r.type] = (u.inventory[r.type] || 0) + r.amount;
+            if (r.type === 'potion-x2') potionsX2 += r.amount;
         }
 
         u.bp.claimedFree.push(level);
@@ -391,14 +424,10 @@ function bpClaimAllRewards() {
         } else if (r.type === 'ticket') {
             u.tickets = (u.tickets || 0) + r.amount;
             ticketsGained += r.amount;
-        } else if (r.type === 'potion-x2') {
+        } else if (r.type === 'potion-x2' || r.type === 'potion-x5') {
             if (!u.inventory) u.inventory = {};
-            u.inventory['potion-x2'] = (u.inventory['potion-x2'] || 0) + r.amount;
-            potionsX2 += r.amount;
-        } else if (r.type === 'potion-x5') {
-            if (!u.inventory) u.inventory = {};
-            u.inventory['potion-x5'] = (u.inventory['potion-x5'] || 0) + r.amount;
-            potionsX5 += r.amount;
+            u.inventory[r.type] = (u.inventory[r.type] || 0) + r.amount;
+            if (r.type === 'potion-x2') potionsX2 += r.amount;
         }
 
         u.bp.claimedPremium.push(level);
@@ -416,14 +445,15 @@ function bpClaimAllRewards() {
     if (tokensGained > 0) parts.push(`${tokensGained.toLocaleString()} jetons`);
     if (ticketsGained > 0) parts.push(`${ticketsGained} ticket(s)`);
     if (potionsX2 > 0) parts.push(`${potionsX2} potion(s) x2`);
-    if (potionsX5 > 0) parts.push(`${potionsX5} potion(s) x5`);
 
     if (typeof showBPMessage === 'function') {
         showBPMessage(`🎉 ${total} récompense(s) réclamée(s) : ${parts.join(', ')}`, 'success');
     }
 }
 
-// --- TICKETS ---
+// ============================================
+//   TICKETS
+// ============================================
 function bpUseTicket() {
     const email = bpGetEmail();
     if (!email) return false;
@@ -475,7 +505,6 @@ function injectTicketsDisplay() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    bpGetSeasonStart();
     injectTicketsDisplay();
     bpUpdateTicketButtons();
     setInterval(() => {
