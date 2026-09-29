@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - Casino Virtual</title>
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="no-select.css">
+    <style>
+        .profile-card {
+            background: #1a0933;
+            border: 2px solid #f1c40f;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .profile-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed rgba(241, 196, 15, 0.3);
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f1c40f, #d35400);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 15px;
+            box-shadow: 0 0 30px rgba(241, 196, 15, 0.6);
+            border: 4px solid #fff;
+        }
+
+        .profile-pseudo {
+            font-size: 1.8rem;
+            color: #f1c40f;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .profile-email {
+            font-size: 0.85rem;
+            color: #b39ddb;
+            word-break: break-all;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-box {
+            background: #0d0f1b;
+            border: 1px solid #4a1570;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #b39ddb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            color: #f1c40f;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-back-home {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-back-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+
+        .loading-message {
+            text-align: center;
+            color: #f1c40f;
+            font-size: 1rem;
+            padding: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .profile-card {
+                padding: 20px;
+            }
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2.4rem;
+            }
+            .profile-pseudo {
+                font-size: 1.4rem;
+            }
+            .stat-value {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        <div id="loading" class="loading-message">⏳ Chargement du profil...</div>
+
+        <div id="profile-content" style="display: none;">
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-pseudo" id="pseudo-display">—</div>
+                <div class="profile-email" id="email-display">—</div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Solde</div>
+                    <div class="stat-value" id="balance-display">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Tickets</div>
+                    <div class="stat-value" id="tickets-display">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Niveau Pass</div>
+                    <div class="stat-value" id="bp-level-display">1</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Rang</div>
+                    <div class="stat-value" id="rank-display">—</div>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <a href="index.html" class="btn-back-home">🏠 RETOUR AU LOBBY</a>
+                <button class="btn-logout" id="logout-btn">🚪 SE DÉCONNECTER</button>
+            </div>
+        </div>
+
+        <div id="error-message" class="message" style="display: none;"></div>
+    </div>
+
+    <!-- 🔥 FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="db.js"></script>
+    <script src="sounds.js"></script>
+
+    <script>
+    // ✅ Page profil : lecture seule, ne modifie JAMAIS les données
+    document.addEventListener('DOMContentLoaded', () => {
+        const loadingEl = document.getElementById('loading');
+        const contentEl = document.getElementById('profile-content');
+        const errorEl = document.getElementById('error-message');
+
+        // 🎯 Charge les infos depuis Firestore UNIQUEMENT (pas de sync auto)
+        async function loadProfile() {
+            if (!fbAuth || !fbDb) {
+                loadingEl.textContent = '❌ Firebase non chargé';
+                return;
+            }
+
+            fbAuth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    // Pas connecté → redirige vers connexion
+                    loadingEl.textContent = '⚠️ Non connecté, redirection...';
+                    setTimeout(() => {
+                        window.location.href = 'connexion.html';
+                    }, 800);
+                    return;
+                }
+
+                try {
+                    // 📥 Charge directement depuis Firestore
+                    const doc = await fbDb.collection('users').doc(user.uid).get();
+                    if (!doc.exists) {
+                        throw new Error('Profil introuvable');
+                    }
+
+                    const data = doc.data();
+                    const users = JSON.parse(localStorage.getItem('casino_users')) || {};
+                    const email = data.email || user.email;
+
+                    // Stocke dans localStorage (pour cohérence avec le reste du site)
+                    users[email] = {
+                        password: '__FIREBASE__',
+                        pseudo: data.pseudo || null,
+                        balance: typeof data.balance === 'number' ? data.balance : 1000,
+                        tickets: typeof data.tickets === 'number' ? data.tickets : 0,
+                        inventory: data.inventory || {},
+                        bp: data.bp || { xp: 0, claimedFree: [], claimedPremium: [], season: 1 },
+                        weekly: data.weekly || { weekStartDate: Date.now(), lastClaimTime: null, claimed: [] },
+                        rankXP: typeof data.rankXP === 'number' ? data.rankXP : 0
+                    };
+                    localStorage.setItem('casino_users', JSON.stringify(users));
+                    localStorage.setItem('casino_logged_email', email);
+                    localStorage.setItem('casinoBalance', users[email].balance.toString());
+
+                    // 🎨 Affiche les infos
+                    document.getElementById('pseudo-display').textContent = data.pseudo || 'Sans pseudo';
+                    document.getElementById('email-display').textContent = email;
+                    document.getElementById('balance-display').textContent = (data.balance || 0).toLocaleString();
+                    document.getElementById('tickets-display').textContent = data.tickets || 0;
+
+                    // Niveau Pass
+                    if (data.bp && typeof data.bp.xp === 'number' && typeof bpGetLevel === 'function') {
+                        document.getElementById('bp-level-display').textContent = bpGetLevel(data.bp.xp);
+                    } else {
+                        document.getElementById('bp-level-display').textContent = '1';
+                    }
+
+                    // Rang
+                    if (typeof getCurrentRankIndex === 'function' && typeof RANKS !== 'undefined') {
+                        const rankXP = data.rankXP || 0;
+                        const idx = getCurrentRankIndex(rankXP);
+                        document.getElementById('rank-display').textContent = RANKS[idx].name;
+                    } else {
+                        document.getElementById('rank-display').textContent = 'Fer';
+                    }
+
+                    loadingEl.style.display = 'none';
+                    contentEl.style.display = 'block';
+                } catch (e) {
+                    console.error('❌ Erreur chargement profil :', e);
+                    loadingEl.style.display = 'none';
+                    errorEl.textContent = '❌ Erreur de chargement du profil';
+                    errorEl.style.display = 'block';
+                }
+            });
+        }
+
+        // 🚪 Bouton déconnexion
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await fbAuth.signOut();
+                if (typeof dbStopSync === 'function') dbStopSync();
+                localStorage.removeItem('casino_logged_email');
+                localStorage.removeItem('casinoBalance');
+                window.location.href = 'index.html';
+            } catch (e) {
+                console.error('❌ Erreur déconnexion :', e);
+            }
+        });
+
+        loadProfile();
+    });
+    </script>
+
+    <!-- Charge battle-pass.js et rank.js APRÈS pour les fonctions bpGetLevel, RANKS -->
+    <script src="battle-pass.js"></script>
+    <script src="rank.js"></script>
+</body>
+</html>
