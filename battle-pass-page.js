@@ -1,4 +1,5 @@
 // battle-pass-page.js
+// Rendu de la page du Pass de Combat style Brawl Stars
 
 let bpHasAutoScrolled = false;
 
@@ -15,6 +16,7 @@ function renderBattlePass() {
     const currentLevel = bpGetLevel(data.bp.xp);
     const currentXP = data.bp.xp;
 
+    // Header
     document.getElementById('bp-current-level').textContent = currentLevel;
     document.getElementById('bp-current-xp').textContent = currentXP;
     document.getElementById('bp-days-remaining').textContent = data.daysRemaining;
@@ -23,6 +25,13 @@ function renderBattlePass() {
     document.getElementById('bp-premium-status').textContent = data.hasPremium ? '👑 Pass Premium Actif' : 'Pass Gratuit';
     document.getElementById('bp-premium-status').classList.toggle('premium-active', data.hasPremium);
 
+    // 🗓️ Numéro de saison dynamique
+    const seasonNumEl = document.getElementById('bp-season-number');
+    if (seasonNumEl) {
+        seasonNumEl.textContent = data.seasonNumber || (typeof bpGetCurrentSeasonNumber === 'function' ? bpGetCurrentSeasonNumber() : 1);
+    }
+
+    // Progression
     const currentThreshold = BP_XP_THRESHOLDS[currentLevel - 1] || 0;
     const nextThreshold = BP_XP_THRESHOLDS[currentLevel] || null;
     const fill = document.getElementById('bp-progress-fill');
@@ -57,6 +66,7 @@ function renderBattlePass() {
         const column = document.createElement('div');
         column.className = 'bp-column' + (isUnlocked ? ' unlocked' : '') + (isCurrent ? ' current' : '');
 
+        // Carte Premium
         const premiumCard = document.createElement('div');
         premiumCard.className = 'bp-slot premium-slot';
         if (!premiumOwned) premiumCard.classList.add('locked');
@@ -76,6 +86,7 @@ function renderBattlePass() {
             premiumCard.addEventListener('click', () => claimLevel(level, 'premium'));
         }
 
+        // Carte Gratuite
         const freeCard = document.createElement('div');
         freeCard.className = 'bp-slot free-slot';
         if (freeClaimed) freeCard.classList.add('claimed');
@@ -93,6 +104,7 @@ function renderBattlePass() {
             freeCard.addEventListener('click', () => claimLevel(level, 'free'));
         }
 
+        // Numéro de niveau
         const levelNumber = document.createElement('div');
         levelNumber.className = 'bp-column-level';
         levelNumber.textContent = level;
@@ -104,6 +116,7 @@ function renderBattlePass() {
         grid.appendChild(column);
     });
 
+    // Auto-scroll au premier chargement
     setTimeout(() => {
         if (!bpHasAutoScrolled) {
             bpHasAutoScrolled = true;
@@ -161,15 +174,26 @@ function showBPMessage(text, type) {
     setTimeout(() => { msg.textContent = ''; msg.className = 'bp-message'; }, 3500);
 }
 
+// ============================================
+//   INIT
+// ============================================
 document.addEventListener('DOMContentLoaded', () => {
     bpHasAutoScrolled = false;
+
+    // 🎁 Attache l'écouteur du bouton "Tout réclamer"
+    const claimAllBtn = document.getElementById('bp-claim-all-btn');
+    if (claimAllBtn) {
+        claimAllBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof bpClaimAllRewards === 'function') {
+                bpClaimAllRewards();
+            } else {
+                console.error('❌ bpClaimAllRewards non trouvée');
+            }
+        });
+    }
+
     renderBattlePass();
     window.addEventListener('storage', renderBattlePass);
-
-    // 🧪 DEBUG : vérifier que la fonction existe
-    console.log('=== DEBUG BATTLE PASS ===');
-    console.log('bpClaimAllRewards existe ?', typeof bpClaimAllRewards);
-    console.log('bpGetAvailableRewards existe ?', typeof bpGetAvailableRewards);
-    console.log('Bouton trouvé ?', !!document.getElementById('bp-claim-all-btn'));
-    console.log('=========================');
 });
