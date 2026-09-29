@@ -107,42 +107,40 @@ if (typeof fbAuth !== 'undefined' && fbAuth) {
         const userDisplay = document.getElementById('user-display');
         const footerLinks = document.getElementById('footer-links');
         const loginForm = document.getElementById('login-form');
-        const authCard = document.getElementById('auth-card');
 
-        if (user) {
-            console.log('👤 Utilisateur connecté :', user.email);
+        try {
+            if (user) {
+                console.log('👤 Utilisateur connecté :', user.email);
 
-            if (loginForm) loginForm.classList.add('hidden');
-            if (loggedSection) loggedSection.classList.remove('hidden');
-            if (footerLinks) footerLinks.classList.add('hidden');
-            if (userDisplay) userDisplay.textContent = user.email;
+                if (loginForm) loginForm.classList.add('hidden');
+                if (loggedSection) loggedSection.classList.remove('hidden');
+                if (footerLinks) footerLinks.classList.add('hidden');
+                if (userDisplay) userDisplay.textContent = user.email;
 
-            await dbStartSync(user);
+                await dbStartSync(user);
 
-            const users = getUsers();
-            const u = users[user.email];
+                const users = getUsers();
+                const u = users[user.email];
 
-            if (u) {
-                if (!u.pseudo && pseudoSection) {
-                    if (loggedSection) loggedSection.classList.add('hidden');
-                    if (registerForm) registerForm.classList.add('hidden');
-                    pseudoSection.classList.remove('hidden');
-                } else if (u.pseudo && userDisplay) {
-                    userDisplay.textContent = u.pseudo;
+                if (u) {
+                    if (!u.pseudo && pseudoSection) {
+                        if (loggedSection) loggedSection.classList.add('hidden');
+                        if (registerForm) registerForm.classList.add('hidden');
+                        pseudoSection.classList.remove('hidden');
+                    } else if (u.pseudo && userDisplay) {
+                        userDisplay.textContent = u.pseudo;
+                    }
                 }
+            } else {
+                console.log('👤 Aucun utilisateur connecté');
+                dbStopSync();
+
+                if (loginForm) loginForm.classList.remove('hidden');
+                if (loggedSection) loggedSection.classList.add('hidden');
+                if (footerLinks) footerLinks.classList.remove('hidden');
             }
-        } else {
-            console.log('👤 Aucun utilisateur connecté');
-            dbStopSync();
-
-            if (loginForm) loginForm.classList.remove('hidden');
-            if (loggedSection) loggedSection.classList.add('hidden');
-            if (footerLinks) footerLinks.classList.remove('hidden');
-        }
-
-        // Rend la carte visible instantanément une fois l'état vérifié (supprime le flash visuel)
-        if (authCard) {
-            authCard.style.opacity = '1';
+        } catch (err) {
+            console.error("Erreur dans onAuthStateChanged :", err);
         }
     });
 }
