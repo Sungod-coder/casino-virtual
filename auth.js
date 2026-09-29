@@ -129,14 +129,8 @@ if (typeof fbAuth !== 'undefined' && fbAuth) {
                 if (footerLinks) footerLinks.classList.add('hidden');
                 if (userDisplay) userDisplay.textContent = u.pseudo || user.email;
 
-                // Rediriger vers index après login réussi (sauf si déjà sur index)
-                const path = window.location.pathname;
-                const isIndex = path.endsWith('/index.html') || path.endsWith('/') || path.endsWith('/index');
-                if (!isIndex && document.getElementById('logout-btn')) {
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 500);
-                }
+                // (Correction) Suppression de la redirection automatique vers index.html 
+                // pour permettre à l'utilisateur de consulter sa page profil / connexion tranquillement.
             }
         } else {
             console.log('👤 Aucun utilisateur connecté');
@@ -218,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Vérifie que le pseudo n'est pas déjà pris
                 const snapshot = await fbDb.collection('users').where('pseudo', '==', pseudoInput).get();
                 if (!snapshot.empty) {
-                    // Un autre user a ce pseudo ?
                     let taken = false;
                     snapshot.forEach(doc => {
                         if (doc.id !== user.uid) taken = true;
@@ -261,10 +254,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (errorMsg) errorMsg.textContent = "⏳ Connexion...";
 
             const res = await firebaseLogin(email, password);
-            if (!res.ok) {
+            if (res.ok) {
+                if (errorMsg) errorMsg.textContent = "✅ Connexion réussie ! Redirection...";
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 800);
+            } else {
                 if (errorMsg) errorMsg.textContent = "❌ " + res.msg;
             }
-            // Si succès, onAuthStateChanged va rediriger automatiquement
         });
     }
 
