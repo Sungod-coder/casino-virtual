@@ -52,7 +52,7 @@ async function firebaseRegister(email, password, pseudo) {
         return { ok: true, user };
     } catch (e) {
         console.error('❌ Erreur inscription :', e);
-        let msg = 'Erreur inconnue';
+        let msg = 'Erreur : ' + (e.code || e.message);
         if (e.code === 'auth/email-already-in-use') msg = "Cet email est déjà utilisé !";
         else if (e.code === 'auth/weak-password') msg = "Le mot de passe doit faire 6 caractères minimum.";
         else if (e.code === 'auth/invalid-email') msg = "L'adresse email est invalide.";
@@ -71,7 +71,7 @@ async function firebaseLogin(email, password) {
         return { ok: true, user: userCredential.user };
     } catch (e) {
         console.error('❌ Erreur connexion :', e);
-        let msg = 'Erreur inconnue';
+        let msg = 'Erreur : ' + (e.code || e.message);
         if (e.code === 'auth/user-not-found') msg = "Aucun compte avec cet email.";
         else if (e.code === 'auth/wrong-password') msg = "Mot de passe incorrect.";
         else if (e.code === 'auth/invalid-credential') msg = "Email ou mot de passe incorrect.";
