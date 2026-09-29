@@ -1,40 +1,71 @@
 // db.js
-// Couche de synchronisation Firebase Firestore ↔ localStorage
-// Les jeux continuent à utiliser localStorage, ce fichier s'occupe du cloud.
+// Sync Firebase Firestore ↔ localStorage avec refresh UI automatique
 
 let __dbSyncReady = false;
 let __dbCurrentUser = null;
 let __dbUnsubscribe = null;
 
-// ============================================
-//   MAPPING localStorage → Firestore
-// ============================================
-// On stocke TOUT dans un seul document Firestore : users/{uid}
-// Structure : { email, pseudo, balance, tickets, inventory, bp, weekly, rankXP, ... }
-
 function dbIsReady() { return __dbSyncReady && __dbCurrentUser !== null; }
 
 // ============================================
-//   CHARGER le document Firestore → localStorage
+//   REFRESH UI après sync Firebase
+// ============================================
+function dbRefreshAllUI() {
+    console.log('🔄 Refresh de l\'UI après sync Firebase...');
+
+    if (typeof updateDisplayBalance === 'function') {
+        try { updateDisplayBalance(); } catch (e) {}
+    }
+    if (typeof renderBattlePass === 'function') {
+        try { renderBattlePass(); } catch (e) {}
+    }
+    if (typeof refreshBPTicketsUI === 'function') {
+        try { refreshBPTicketsUI(); } catch (e) {}
+    }
+    if (typeof potionUpdateUI === 'function') {
+        try { potionUpdateUI(); } catch (e) {}
+    }
+    if (typeof renderWeeklyRewards === 'function') {
+        try { renderWeeklyRewards(); } catch (e) {}
+    }
+    if (typeof updateRankButton === 'function') {
+        try { updateRankButton(); } catch (e) {}
+    }
+    if (typeof shopUpdateUI === 'function') {
+        try { shopUpdateUI(); } catch (e) {}
+    }
+
+    // Refresh aussi les solde des jeux (si on est sur une page de jeu)
+    const balanceEl = document.getElementById('balance-val');
+    if (balanceEl) {
+        const users = JSON.parse(localStorage.getItem('casino_users')) || {};
+        const email = localStorage.getItem('casino_logged_email');
+        if (users[email] && typeof users[email].balance === 'number') {
+            const coinHtml = '<span class="coin">M</span>';
+            balanceEl.innerHTML = `${users[email].balance} ${coinHtml}`;
+        }
+    }
+}
+
+// ============================================
+//   CHARGER Firestore → localStorage
 // ============================================
 async function dbLoadUserToLocal(uid) {
-    if (!fbDb) return;
+    if (!fbDb) return null;
     try {
         const doc = await fbDb.collection('users').doc(uid).get();
         if (!doc.exists) {
-            console.log('📭 Nouvel utilisateur — pas de données Firestore');
+            console.log('📭 Nouvel utilisateur');
             return null;
         }
 
         const data = doc.data();
-        console.log('📥 Données chargées depuis Firestore :', data);
-
-        // On reconstitue casino_users[email] avec les données Firestore
         const users = JSON.parse(localStorage.getItem('casino_users')) || {};
         const email = data.email;
 
+        // ⚠️ IMPORTANT : on écrase avec les données Firestore
         users[email] = {
-            password: '__FIREBASE__', // le mot de passe est géré par Firebase
+            password: '__FIREBASE__',
             pseudo: data.pseudo || null,
             balance: typeof data.balance === 'number' ? data.balance : 1000,
             tickets: typeof data.tickets === 'number' ? data.tickets : 0,
@@ -48,7 +79,7 @@ async function dbLoadUserToLocal(uid) {
         localStorage.setItem('casino_logged_email', email);
         localStorage.setItem('casinoBalance', users[email].balance.toString());
 
-        console.log('✅ Données Firestore appliquées au localStorage');
+        console.log('✅ Données Firestore appliquées');
         return email;
     } catch (e) {
         console.error('❌ Erreur dbLoadUserToLocal :', e);
@@ -80,51 +111,58 @@ async function dbSaveUserToCloud() {
             rankXP: u.rankXP || 0,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        console.log('☁️ Données sauvegardées dans Firestore');
+        console.log('☁️ Sauvegardé dans Firestore');
     } catch (e) {
         console.error('❌ Erreur dbSaveUserToCloud :', e);
     }
 }
 
 // ============================================
-//   DÉMARRAGE de la synchronisation
+//   DÉMARRAGE de la sync
 // ============================================
 async function dbStartSync(user) {
     __dbCurrentUser = user;
-    console.log('🔄 Démarrage de la sync pour :', user.email);
+    console.log('🔄 Sync pour :', user.email);
 
-    // 1. Charger les données Firestore → localStorage
+    // 1. Charger Firestore → localStorage
     const email = await dbLoadUserToLocal(user.uid);
     if (!email) {
-        // Nouveau compte : on crée le doc avec les valeurs par défaut
+        // Nouveau compte : on crée le doc
         await dbSaveUserToCloud();
     }
 
-    // 2. Écouter les changements Firestore en temps réel
+    // 2. 🔥 Refresh l'UI avec les vraies données
+    dbRefreshAllUI();
+
+    // 3. Écouter les changements Firestore en temps réel
     if (__dbUnsubscribe) __dbUnsubscribe();
     __dbUnsubscribe = fbDb.collection('users').doc(user.uid).onSnapshot((doc) => {
         if (!doc.exists) return;
         const data = doc.data();
         const users = JSON.parse(localStorage.getItem('casino_users')) || {};
         const email = data.email || user.email;
+        if (!users[email]) return;
 
-        // On évite de s'écraser soi-même si la donnée est identique
-        const currentLocal = users[email];
-        if (!currentLocal) return;
+        // 🔥 Vérifie si les données ont vraiment changé
+        const localBalance = users[email].balance || 0;
+        const firestoreBalance = typeof data.balance === 'number' ? data.balance : localBalance;
 
-        // Mise à jour douce
-        users[email].balance = typeof data.balance === 'number' ? data.balance : currentLocal.balance;
-        users[email].tickets = typeof data.tickets === 'number' ? data.tickets : currentLocal.tickets;
-        users[email].inventory = data.inventory || currentLocal.inventory;
-        users[email].bp = data.bp || currentLocal.bp;
-        users[email].weekly = data.weekly || currentLocal.weekly;
-        users[email].rankXP = typeof data.rankXP === 'number' ? data.rankXP : currentLocal.rankXP;
-        users[email].pseudo = data.pseudo || currentLocal.pseudo;
+        users[email].balance = firestoreBalance;
+        users[email].tickets = typeof data.tickets === 'number' ? data.tickets : users[email].tickets;
+        users[email].inventory = data.inventory || users[email].inventory;
+        users[email].bp = data.bp || users[email].bp;
+        users[email].weekly = data.weekly || users[email].weekly;
+        users[email].rankXP = typeof data.rankXP === 'number' ? data.rankXP : users[email].rankXP;
+        users[email].pseudo = data.pseudo || users[email].pseudo;
 
         localStorage.setItem('casino_users', JSON.stringify(users));
         localStorage.setItem('casinoBalance', (users[email].balance || 0).toString());
 
-        console.log('🔄 Sync Firestore → localStorage');
+        // 🔥 Refresh l'UI si le solde a changé
+        if (localBalance !== firestoreBalance) {
+            console.log('🔄 Solde mis à jour depuis Firestore :', firestoreBalance);
+            dbRefreshAllUI();
+        }
     });
 
     __dbSyncReady = true;
@@ -132,7 +170,7 @@ async function dbStartSync(user) {
 }
 
 // ============================================
-//   AUTO-SYNC localStorage → Firestore (débounce 1.5s)
+//   AUTO-SYNC avec DEBOUNCE
 // ============================================
 let __dbSaveTimeout = null;
 function dbScheduleSave() {
@@ -140,10 +178,10 @@ function dbScheduleSave() {
     clearTimeout(__dbSaveTimeout);
     __dbSaveTimeout = setTimeout(() => {
         dbSaveUserToCloud();
-    }, 1500);
+    }, 800);
 }
 
-// Intercepte les écritures localStorage pour sauvegarder sur Firestore
+// Intercepte localStorage.setItem
 (function() {
     const originalSetItem = localStorage.setItem.bind(localStorage);
     localStorage.setItem = function(key, value) {
@@ -154,8 +192,30 @@ function dbScheduleSave() {
     };
 })();
 
+// 🔥 Force la sauvegarde quand on quitte la page
+window.addEventListener('beforeunload', () => {
+    if (__dbSyncReady && __dbCurrentUser) {
+        // Save synchrone (best effort)
+        try {
+            const email = localStorage.getItem('casino_logged_email');
+            const users = JSON.parse(localStorage.getItem('casino_users')) || {};
+            const u = users[email];
+            if (u) {
+                fbDb.collection('users').doc(__dbCurrentUser.uid).set({
+                    balance: u.balance || 0,
+                    tickets: u.tickets || 0,
+                    inventory: u.inventory || {},
+                    bp: u.bp || {},
+                    weekly: u.weekly || {},
+                    rankXP: u.rankXP || 0
+                }, { merge: true });
+            }
+        } catch (e) {}
+    }
+});
+
 // ============================================
-//   STOP la sync (déconnexion)
+//   STOP
 // ============================================
 function dbStopSync() {
     if (__dbUnsubscribe) {
@@ -166,12 +226,3 @@ function dbStopSync() {
     __dbSyncReady = false;
     console.log('🛑 Sync arrêtée');
 }
-
-// ============================================
-//   EXPORT
-// ============================================
-window.dbIsReady = dbIsReady;
-window.dbLoadUserToLocal = dbLoadUserToLocal;
-window.dbSaveUserToCloud = dbSaveUserToCloud;
-window.dbStartSync = dbStartSync;
-window.dbStopSync = dbStopSync;
