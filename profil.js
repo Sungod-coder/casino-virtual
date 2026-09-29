@@ -1,4 +1,5 @@
-// profil.js - Gestion de la page de profil (Lecture seule sécurisée)
+// profil.js - Page de profil EN LECTURE SEULE
+// ⚠️ Ne modifie JAMAIS les données, ne fait QUE les lire depuis Firestore
 
 document.addEventListener('DOMContentLoaded', () => {
     const loadingEl = document.getElementById('loading');
@@ -6,85 +7,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorEl = document.getElementById('error-message');
 
     async function loadProfile() {
-        if (!window.fbAuth || !window.fbDb) {
+        if (typeof fbAuth === 'undefined' || !fbAuth) {
             if (loadingEl) loadingEl.textContent = '❌ Firebase non chargé';
             return;
         }
 
-        // Écoute de l'état d'authentification
         fbAuth.onAuthStateChanged(async (user) => {
             if (!user) {
                 if (loadingEl) loadingEl.textContent = '⚠️ Non connecté, redirection...';
-                setTimeout(() => {
-                    window.location.href = 'connexion.html';
-                }, 800);
+                setTimeout(() => { window.location.href = 'connexion.html'; }, 800);
                 return;
             }
 
             try {
-                // 📥 Récupération directe des données depuis Firestore (la source de vérité absolue)
+                // 📥 Chargement DIRECT depuis Firestore (source de vérité)
                 const docRef = fbDb.collection('users').doc(user.uid);
                 const doc = await docRef.get();
 
                 if (!doc.exists) {
-                    throw new Error('Profil introuvable dans Firestore');
+                    // Pas de doc = on ne touche à rien, on affiche juste ce qu'on peut
+                    console.warn('📭 Doc Firestore inexistant');
+                    if (loadingEl) loadingEl.textContent = '⚠️ Aucun profil trouvé';
+                    return;
                 }
 
                 const data = doc.data();
                 const email = data.email || user.email;
 
-                // 🔄 Mise à jour propre du localStorage SANS écraser bêtement les objets annexes
-                let users = JSON.parse(localStorage.getItem('casino_users')) || {};
-                if (!users[email]) users[email] = {};
-
-                // On fusionne les données reçues du Cloud sans perdre le reste
-                users[email].pseudo = data.pseudo || users[email].pseudo || null;
-                users[email].balance = typeof data.balance === 'number' ? data.balance : (users[email].balance || 1000);
-                users[email].tickets = typeof data.tickets === 'number' ? data.tickets : (users[email].tickets || 0);
-                users[email].inventory = data.inventory || users[email].inventory || {};
-                users[email].bp = data.bp || users[email].bp || { xp: 0, claimedFree: [], claimedPremium: [], season: 1 };
-                users[email].weekly = data.weekly || users[email].weekly || { weekStartDate: Date.now(), lastClaimTime: null, claimed: [] };
-                users[email].rankXP = typeof data.rankXP === 'number' ? data.rankXP : (users[email].rankXP || 0);
-
-                // Enregistrement silencieux dans le localStorage pour les autres pages
-                localStorage.setItem('casino_users', JSON.stringify(users));
-                localStorage.setItem('casino_logged_email', email);
-                localStorage.setItem('casinoBalance', users[email].balance.toString());
-
-                // 🎨 Affichage dans l'interface du profil
-                const pseudoDisp = document.getElementById('pseudo-display');
-                const emailDisp = document.getElementById('email-display');
-                const balanceDisp = document.getElementById('balance-display');
-                const ticketsDisp = document.getElementById('tickets-display');
-                const bpLevelDisp = document.getElementById('bp-level-display');
-                const rankDisp = document.getElementById('rank-display');
-
-                if (pseudoDisp) pseudoDisp.textContent = data.pseudo || 'Sans pseudo';
-                if (emailDisp) emailDisp.textContent = email;
-                if (balanceDisp) balanceDisp.textContent = (users[email].balance).toLocaleString();
-                if (ticketsDisp) ticketsDisp.textContent = users[email].tickets;
+                // 🎨 Affichage (lecture seule, on ne sauvegarde RIEN)
+                if (document.getElementById('pseudo-display'))
+                    document.getElementById('pseudo-display').textContent = data.pseudo || 'Sans pseudo';
+                if (document.getElementById('email-display'))
+                    document.getElementById('email-display').textContent = email;
+                if (document.getElementById('balance-display'))
+                    document.getElementById('balance-display').textContent = (data.balance || 0).toLocaleString();
+                if (document.getElementById('tickets-display'))
+                    document.getElementById('tickets-display').textContent = data.tickets || 0;
 
                 // Niveau Pass
-                if (bpLevelDisp) {
+                if (document.getElementById('bp-level-display')) {
                     if (data.bp && typeof data.bp.xp === 'number' && typeof bpGetLevel === 'function') {
-                        bpLevelDisp.textContent = bpGetLevel(data.bp.xp);
+                        document.getElementById('bp-level-display').textContent = bpGetLevel(data.bp.xp);
                     } else {
-                        bpLevelDisp.textContent = data.bp && data.bp.season ? data.bp.season : '1';
+                        document.getElementById('bp-level-display').textContent = '1';
                     }
                 }
 
                 // Rang
-                if (rankDisp) {
+                if (document.getElementById('rank-display')) {
                     if (typeof getCurrentRankIndex === 'function' && typeof RANKS !== 'undefined') {
-                        const rankXP = data.rankXP || 0;
-                        const idx = getCurrentRankIndex(rankXP);
-                        rankDisp.textContent = RANKS[idx] ? RANKS[idx].name : 'Fer';
+                        const idx = getCurrentRankIndex(data.rankXP || 0);
+                        document.getElementById('rank-display').textContent = RANKS[idx] ? RANKS[idx].name : 'Fer';
                     } else {
-                        rankDisp.textContent = 'Fer';
+                        document.getElementById('rank-display').textContent = 'Fer';
                     }
                 }
 
-                // Affichage du contenu de la carte
                 if (loadingEl) loadingEl.style.display = 'none';
                 if (contentEl) contentEl.style.display = 'block';
 
@@ -99,12 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🚪 Gestion du bouton de déconnexion
+    // 🚪 Déconnexion
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
             try {
-                if (window.fbAuth) await fbAuth.signOut();
+                if (typeof fbAuth !== 'undefined' && fbAuth) await fbAuth.signOut();
                 if (typeof dbStopSync === 'function') dbStopSync();
                 localStorage.removeItem('casino_logged_email');
                 localStorage.removeItem('casinoBalance');
