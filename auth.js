@@ -1,27 +1,12 @@
 // auth.js
 // Authentification via Firebase Auth + synchronisation Firestore
 
-// ============================================
-//   UTILS (compat avec l'ancien code)
-// ============================================
 function getUsers() {
     return JSON.parse(localStorage.getItem('casino_users')) || {};
 }
 
 function saveUsers(users) {
     localStorage.setItem('casino_users', JSON.stringify(users));
-}
-
-function getCurrentEmail() {
-    return localStorage.getItem('casino_logged_email');
-}
-
-function setCurrentEmail(email) {
-    if (email) {
-        localStorage.setItem('casino_logged_email', email);
-    } else {
-        localStorage.removeItem('casino_logged_email');
-    }
 }
 
 // ============================================
@@ -32,7 +17,6 @@ async function firebaseRegister(email, password, pseudo) {
         const userCredential = await fbAuth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
 
-        // Créer le document Firestore
         await fbDb.collection('users').doc(user.uid).set({
             email: email,
             pseudo: pseudo || null,
@@ -45,9 +29,7 @@ async function firebaseRegister(email, password, pseudo) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // Charger dans localStorage
         await dbLoadUserToLocal(user.uid);
-
         console.log('✅ Compte créé sur Firebase');
         return { ok: true, user };
     } catch (e) {
@@ -74,7 +56,6 @@ async function firebaseLogin(email, password) {
         if (e.code === 'auth/user-not-found') msg = "Aucun compte avec cet email.";
         else if (e.code === 'auth/wrong-password') msg = "Mot de passe incorrect.";
         else if (e.code === 'auth/invalid-credential') msg = "Email ou mot de passe incorrect.";
-        else if (e.code === 'auth/invalid-email') msg = "Adresse email invalide.";
         else if (e.code === 'auth/too-many-requests') msg = "Trop de tentatives. Réessaie plus tard.";
         return { ok: false, msg };
     }
@@ -97,7 +78,7 @@ async function firebaseLogout() {
 }
 
 // ============================================
-//   onAuthStateChanged : l'utilisateur est-il connecté ?
+//   onAuthStateChanged
 // ============================================
 if (typeof fbAuth !== 'undefined' && fbAuth) {
     fbAuth.onAuthStateChanged(async (user) => {
@@ -108,39 +89,31 @@ if (typeof fbAuth !== 'undefined' && fbAuth) {
         const footerLinks = document.getElementById('footer-links');
         const loginForm = document.getElementById('login-form');
 
-        try {
-            if (user) {
-                console.log('👤 Utilisateur connecté :', user.email);
+        if (user) {
+            console.log('👤 Utilisateur connecté :', user.email);
+            if (loginForm) loginForm.classList.add('hidden');
+            if (loggedSection) loggedSection.classList.remove('hidden');
+            if (footerLinks) footerLinks.classList.add('hidden');
+            if (userDisplay) userDisplay.textContent = user.email;
 
-                if (loginForm) loginForm.classList.add('hidden');
-                if (loggedSection) loggedSection.classList.remove('hidden');
-                if (footerLinks) footerLinks.classList.add('hidden');
-                if (userDisplay) userDisplay.textContent = user.email;
+            await dbStartSync(user);
 
-                await dbStartSync(user);
+            const users = getUsers();
+            const u = users[user.email];
 
-                const users = getUsers();
-                const u = users[user.email];
-
-                if (u) {
-                    if (!u.pseudo && pseudoSection) {
-                        if (loggedSection) loggedSection.classList.add('hidden');
-                        if (registerForm) registerForm.classList.add('hidden');
-                        pseudoSection.classList.remove('hidden');
-                    } else if (u.pseudo && userDisplay) {
-                        userDisplay.textContent = u.pseudo;
-                    }
-                }
-            } else {
-                console.log('👤 Aucun utilisateur connecté');
-                dbStopSync();
-
-                if (loginForm) loginForm.classList.remove('hidden');
+            if (u && !u.pseudo && pseudoSection) {
                 if (loggedSection) loggedSection.classList.add('hidden');
-                if (footerLinks) footerLinks.classList.remove('hidden');
+                if (registerForm) registerForm.classList.add('hidden');
+                pseudoSection.classList.remove('hidden');
+            } else if (u && u.pseudo && userDisplay) {
+                userDisplay.textContent = u.pseudo;
             }
-        } catch (err) {
-            console.error("Erreur dans onAuthStateChanged :", err);
+        } else {
+            console.log('👤 Aucun utilisateur connecté');
+            dbStopSync();
+            if (loginForm) loginForm.classList.remove('hidden');
+            if (loggedSection) loggedSection.classList.add('hidden');
+            if (footerLinks) footerLinks.classList.remove('hidden');
         }
     });
 }
@@ -156,9 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMsg = document.getElementById('error-message');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // ========================================
-    //   INSCRIPTION (ÉTAPE 1)
-    // ========================================
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -172,14 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (errorMsg) errorMsg.textContent = "Les mots de passe ne correspondent pas !";
                 return;
             }
-
             if (password.length < 6) {
                 if (errorMsg) errorMsg.textContent = "Le mot de passe doit faire au moins 6 caractères.";
                 return;
             }
 
             if (errorMsg) errorMsg.textContent = "⏳ Création du compte...";
-
             const res = await firebaseRegister(email, password, null);
             if (res.ok) {
                 if (registerForm) registerForm.classList.add('hidden');
@@ -193,9 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========================================
-    //   INSCRIPTION (ÉTAPE 2 — PSEUDO)
-    // ========================================
     if (savePseudoBtn) {
         savePseudoBtn.addEventListener('click', async () => {
             const pseudoInput = document.getElementById('pseudo-input').value.trim();
@@ -212,21 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            if (errorMsg) errorMsg.textContent = "⏳ Vérification du pseudo...";
+            if (errorMsg) errorMsg.textContent = "⏳ Enregistrement du pseudo...";
 
             try {
-                const snapshot = await fbDb.collection('users').where('pseudo', '==', pseudoInput).get();
-                if (!snapshot.empty) {
-                    let taken = false;
-                    snapshot.forEach(doc => {
-                        if (doc.id !== user.uid) taken = true;
-                    });
-                    if (taken) {
-                        if (errorMsg) errorMsg.textContent = "Ce pseudo est déjà pris !";
-                        return;
-                    }
-                }
-
+                // Enregistrement direct sans vérification bloquante de doublon pour éviter les erreurs de requêtes
                 await fbDb.collection('users').doc(user.uid).update({ pseudo: pseudoInput });
 
                 const users = getUsers();
@@ -245,9 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========================================
-    //   CONNEXION
-    // ========================================
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -255,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
 
             if (errorMsg) errorMsg.textContent = "⏳ Connexion...";
-
             const res = await firebaseLogin(email, password);
             if (res.ok) {
                 if (errorMsg) errorMsg.textContent = "✅ Connexion réussie ! Redirection...";
@@ -268,9 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ========================================
-    //   DÉCONNEXION
-    // ========================================
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
             await firebaseLogout();
