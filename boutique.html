@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="battle-pass.css">
     <link rel="stylesheet" href="no-select.css">
     <style>
-        /* ====== OVERLAY OUVERTURE DE COFFRE ====== */
         .chest-overlay {
             display: none;
             position: fixed;
@@ -32,7 +31,6 @@
             text-transform: uppercase;
             text-shadow: 0 0 30px rgba(241, 196, 15, 0.8);
             margin-bottom: 40px;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
             animation: titlePulse 1.5s infinite;
         }
         @keyframes titlePulse {
@@ -53,7 +51,6 @@
             border-bottom: 3px solid #f1c40f;
             box-shadow: 0 0 60px rgba(241, 196, 15, 0.4) inset;
         }
-
         .chest-roller-wrap::before,
         .chest-roller-wrap::after {
             content: "";
@@ -64,14 +61,8 @@
             z-index: 5;
             pointer-events: none;
         }
-        .chest-roller-wrap::before {
-            left: 0;
-            background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
-        }
-        .chest-roller-wrap::after {
-            right: 0;
-            background: linear-gradient(270deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
-        }
+        .chest-roller-wrap::before { left: 0; background: linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%); }
+        .chest-roller-wrap::after { right: 0; background: linear-gradient(270deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 50%, transparent 100%); }
 
         .chest-center-line {
             position: absolute;
@@ -90,7 +81,6 @@
             0%, 100% { box-shadow: 0 0 20px rgba(241, 196, 15, 1), 0 0 40px rgba(255, 0, 122, 0.6); }
             50% { box-shadow: 0 0 30px rgba(241, 196, 15, 1), 0 0 60px rgba(255, 0, 122, 1); }
         }
-
         .chest-center-line::before,
         .chest-center-line::after {
             content: "";
@@ -100,14 +90,8 @@
             border-left: 12px solid transparent;
             border-right: 12px solid transparent;
         }
-        .chest-center-line::before {
-            top: -6px;
-            border-bottom: 15px solid #f1c40f;
-        }
-        .chest-center-line::after {
-            bottom: -6px;
-            border-top: 15px solid #f1c40f;
-        }
+        .chest-center-line::before { top: -6px; border-bottom: 15px solid #f1c40f; }
+        .chest-center-line::after { bottom: -6px; border-top: 15px solid #f1c40f; }
 
         .chest-roller {
             display: flex;
@@ -116,7 +100,6 @@
             will-change: transform;
             transition: transform 0s linear;
         }
-
         .chest-roll-item {
             flex-shrink: 0;
             width: 180px;
@@ -132,29 +115,14 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
             overflow: hidden;
         }
-
-        .chest-roll-icon {
-            font-size: 3rem;
-            line-height: 1;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-        }
-
-        .chest-roll-label {
-            font-size: 0.75rem;
-            font-weight: 900;
-            text-align: center;
-            padding: 0 8px;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            letter-spacing: 0.5px;
-        }
+        .chest-roll-icon { font-size: 3rem; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+        .chest-roll-label { font-size: 0.75rem; font-weight: 900; text-align: center; padding: 0 8px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
         .chest-roll-item.common { background: linear-gradient(180deg, #2c3e50, #1a252f); border-color: #7f8c8d; }
         .chest-roll-item.uncommon { background: linear-gradient(180deg, #1a4d2e, #0d2b1a); border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
         .chest-roll-item.rare { background: linear-gradient(180deg, #1a3a5c, #0a1a2c); border-color: #3498db; box-shadow: 0 0 20px rgba(52, 152, 219, 0.5); }
         .chest-roll-item.epic { background: linear-gradient(180deg, #4a1a5c, #2a0a3c); border-color: #9b59b6; box-shadow: 0 0 25px rgba(155, 89, 182, 0.6); }
         .chest-roll-item.legendary { background: linear-gradient(180deg, #5c1a3a, #3c0a1a); border-color: #ff007a; box-shadow: 0 0 30px rgba(255, 0, 122, 0.7); }
-
         .chest-roll-item.winner { animation: winnerGlow 0.5s infinite alternate; }
         @keyframes winnerGlow {
             from { box-shadow: 0 0 25px currentColor, 0 0 50px currentColor; }
@@ -170,20 +138,8 @@
             min-height: 80px;
         }
         .chest-result.visible { opacity: 1; transform: translateY(0); }
-
-        .chest-result-title {
-            font-size: 1.6rem;
-            font-weight: 900;
-            letter-spacing: 3px;
-            margin-bottom: 12px;
-            text-shadow: 0 0 20px currentColor;
-        }
-
-        .chest-result-text {
-            font-size: 1.1rem;
-            color: #fff;
-            font-weight: 700;
-        }
+        .chest-result-title { font-size: 1.6rem; font-weight: 900; letter-spacing: 3px; margin-bottom: 12px; text-shadow: 0 0 20px currentColor; }
+        .chest-result-text { font-size: 1.1rem; color: #fff; font-weight: 700; }
 
         .chest-continue-btn {
             margin-top: 30px;
@@ -228,8 +184,6 @@
             .chest-roll-icon { font-size: 2.2rem; }
             .chest-roll-label { font-size: 0.65rem; }
             .chest-roller-wrap::before, .chest-roller-wrap::after { width: 100px; }
-            .chest-result-title { font-size: 1.2rem; }
-            .chest-result-text { font-size: 0.95rem; }
         }
     </style>
 </head>
@@ -279,7 +233,6 @@
         </section>
     </div>
 
-    <!-- ====== OVERLAY OUVERTURE DE COFFRE ====== -->
     <div id="chest-overlay" class="chest-overlay">
         <div class="chest-title">🎁 Ouverture du Coffre...</div>
 
@@ -296,6 +249,13 @@
 
         <button id="chest-continue-btn" class="chest-continue-btn" onclick="closeChestOverlay()">SUPER !</button>
     </div>
+
+    <!-- 🔥 FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="db.js"></script>
 
     <script src="battle-pass.js"></script>
     <script src="main.js"></script>
