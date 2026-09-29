@@ -1,5 +1,5 @@
 // db.js
-// Sync ROBUSTE avec timer de secours
+// Sync Firestore ↔ localStorage avec protection anti-écrasement
 
 let __dbCurrentUser = null;
 let __dbSyncReady = false;
@@ -37,6 +37,7 @@ async function dbLoadUserToLocal(uid) {
     try {
         const doc = await fbDb.collection('users').doc(uid).get();
         if (!doc.exists) return null;
+
         const data = doc.data();
         const users = JSON.parse(localStorage.getItem('casino_users')) || {};
         const email = data.email;
@@ -56,6 +57,7 @@ async function dbLoadUserToLocal(uid) {
         localStorage.setItem('casino_users', JSON.stringify(users));
         localStorage.setItem('casino_logged_email', email);
         localStorage.setItem('casinoBalance', users[email].balance.toString());
+
         console.log('✅ Firestore → localStorage (balance:', users[email].balance, ')');
         return email;
     } catch (e) {
@@ -65,11 +67,10 @@ async function dbLoadUserToLocal(uid) {
 }
 
 // ============================================
-//   SAUVEGARDER
+//   SAUVEGARDER localStorage → Firestore
 // ============================================
 async function dbSaveUserToCloud() {
     if (!__dbCurrentUser || !fbDb) {
-        console.warn('⏸️ Save annulé : pas de user');
         return;
     }
     if (__dbSaveInFlight) return;
@@ -82,8 +83,6 @@ async function dbSaveUserToCloud() {
         __dbSaveInFlight = false;
         return;
     }
-
-    console.log('💾 Save START — balance:', u.balance);
 
     try {
         await fbDb.collection('users').doc(__dbCurrentUser.uid).set({
@@ -109,24 +108,34 @@ async function dbSaveUserToCloud() {
 }
 
 // ============================================
-//   DÉMARRAGE
+//   DÉMARRAGE (avec vérification intelligente)
 // ============================================
 async function dbStartSync(user) {
     if (!user) return;
     __dbCurrentUser = user;
     console.log('🔄 Sync START pour :', user.email);
 
-    // 🛡️ Si modifs en attente, NE PAS écraser le local
+    // 📖 Vérifie si on a VRAIMENT des données locales valides
+    const users = JSON.parse(localStorage.getItem('casino_users')) || {};
+    const localUser = users[user.email];
+    const hasLocalData = localUser && typeof localUser.balance === 'number';
+
     const pending = localStorage.getItem('casino_pending_save');
-    if (pending && (Date.now() - parseInt(pending, 10) < 600000)) {
-        console.log('🛡️ Modifs en attente → on GARDE le local et on push');
+    const pendingAge = pending ? Date.now() - parseInt(pending, 10) : Infinity;
+
+    // 🛡️ On garde le local UNIQUEMENT si :
+    // 1. Il y a des données locales valides
+    // 2. ET le flag pending est récent (< 2 min)
+    if (hasLocalData && pending && pendingAge < 120000) {
+        console.log('🛡️ Modifs récentes → on garde le local et on push');
         __dbSyncReady = true;
         dbRefreshAllUI();
         await dbSaveUserToCloud();
         return;
     }
 
-    // Sinon charger Firestore
+    // ✅ Sinon : Firestore est la source de vérité
+    console.log('📥 Chargement Firestore');
     await dbLoadUserToLocal(user.uid);
     dbRefreshAllUI();
     __dbSyncReady = true;
@@ -143,7 +152,6 @@ async function dbStartSync(user) {
         if (key === 'casino_users' || key === 'casinoBalance') {
             originalSetItem('casino_pending_save', Date.now().toString());
             console.log('📝 Modif locale détectée');
-            // Tentative immédiate (peut échouer si user pas prêt)
             if (__dbCurrentUser) {
                 dbSaveUserToCloud();
             }
@@ -152,8 +160,7 @@ async function dbStartSync(user) {
 })();
 
 // ============================================
-//   🔥 TIMER DE SECOURS — toutes les 2 secondes
-//   Vérifie s'il y a des modifs non poussées et les envoie
+//   TIMER DE SECOURS (retry toutes les 2s)
 // ============================================
 setInterval(() => {
     if (!__dbCurrentUser) return;
@@ -165,7 +172,7 @@ setInterval(() => {
 }, 2000);
 
 // ============================================
-//   SAUVEGARDES AGRESSIVES (mobile)
+//   SAUVEGARDES AGRESSIVES
 // ============================================
 function forceSave() {
     if (__dbCurrentUser) dbSaveUserToCloud();
@@ -185,14 +192,23 @@ if (typeof fbAuth !== 'undefined' && fbAuth) {
             if (__dbCurrentUser && __dbCurrentUser.uid === user.uid && __dbSyncReady) return;
             dbStartSync(user);
         } else {
-            __dbCurrentUser = null;
-            __dbSyncReady = false;
+            dbStopSync();
         }
     });
+}
+
+// ============================================
+//   STOP
+// ============================================
+function dbStopSync() {
+    __dbCurrentUser = null;
+    __dbSyncReady = false;
+    console.log('🛑 Sync arrêtée');
 }
 
 window.dbIsReady = dbIsReady;
 window.dbLoadUserToLocal = dbLoadUserToLocal;
 window.dbSaveUserToCloud = dbSaveUserToCloud;
 window.dbStartSync = dbStartSync;
+window.dbStopSync = dbStopSync;
 window.dbForceSave = forceSave;
