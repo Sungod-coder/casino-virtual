@@ -1,9 +1,8 @@
 // potion.js
-// Système de potions de chance
+// Système de potions de chance (uniquement Potion x2)
 
 const POTION_CONFIG = {
-    'potion-x2': { duration: 2 * 60 * 1000, multiplier: 2, label: 'Potion Chance x2', icon: '🧪' },
-    'potion-x5': { duration: 5 * 60 * 1000, multiplier: 5, label: 'Potion Chance x5', icon: '⚗️' }
+    'potion-x2': { duration: 2 * 60 * 1000, multiplier: 2, label: 'Potion Chance x2', icon: '🧪' }
 };
 
 // --- UTILS ---
@@ -25,7 +24,7 @@ function potionGetCount(type) {
 }
 
 function potionGetTotalCount() {
-    return potionGetCount('potion-x2') + potionGetCount('potion-x5');
+    return potionGetCount('potion-x2');
 }
 
 function potionConsume(type) {
@@ -160,7 +159,6 @@ function potionRenderPanel() {
 
     const active = potionGetActive();
     const countX2 = potionGetCount('potion-x2');
-    const countX5 = potionGetCount('potion-x5');
 
     let html = '';
 
@@ -186,17 +184,6 @@ function potionRenderPanel() {
                 <div class="potion-item-count">x${countX2}</div>
             </div>
             <button class="potion-use-btn" data-potion="potion-x2" ${countX2 < 1 || active ? 'disabled' : ''}>
-                ${active ? 'BLOQUÉ' : 'UTILISER'}
-            </button>
-        </div>
-        <div class="potion-item">
-            <div class="potion-item-icon">⚗️</div>
-            <div class="potion-item-info">
-                <div class="potion-item-name">Potion Chance x5</div>
-                <div class="potion-item-desc">Durée : 5 minutes</div>
-                <div class="potion-item-count">x${countX5}</div>
-            </div>
-            <button class="potion-use-btn" data-potion="potion-x5" ${countX5 < 1 || active ? 'disabled' : ''}>
                 ${active ? 'BLOQUÉ' : 'UTILISER'}
             </button>
         </div>
