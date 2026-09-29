@@ -1,9 +1,6 @@
 // firebase-config.js
-// Configuration Firebase — version compat (compatible scripts classiques)
-
-// 🔥 CONFIGURATION DE TON PROJET FIREBASE
 const firebaseConfig = {
-    apiKey: "AIzaSyCZOz9F8Wdc86GtyZRqyXL3i0prUbQt9M",
+    apiKey: "AIzaSyD_LU1lAbrLRnaDwmuKYQl0vbtrW_CdFIIWc",
     authDomain: "casino-virtual-a36b2.firebaseapp.com",
     projectId: "casino-virtual-a36b2",
     storageBucket: "casino-virtual-a36b2.firebasestorage.app",
@@ -12,7 +9,6 @@ const firebaseConfig = {
     measurementId: "G-2GKDKLCP75"
 };
 
-// 🔥 Initialisation Firebase (compat v9)
 if (typeof firebase !== 'undefined') {
     if (!firebase.apps || !firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -20,10 +16,9 @@ if (typeof firebase !== 'undefined') {
     console.log('✅ Firebase initialisé !');
     console.log('📦 Projet :', firebase.app().options.projectId);
 } else {
-    console.error('❌ Firebase SDK non chargé — vérifie les balises <script> dans le HTML');
+    console.error('❌ Firebase SDK non chargé');
 }
 
-// 🔥 Instances globales (accessibles partout)
 let fbAuth = null;
 let fbDb = null;
 
@@ -33,6 +28,5 @@ if (typeof firebase !== 'undefined') {
     console.log('✅ Auth + Firestore prêts');
 }
 
-// 🔥 Helpers pour récupérer les instances depuis n'importe quel script
 function getFbAuth() { return fbAuth; }
 function getFbDb() { return fbDb; }
