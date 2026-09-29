@@ -67,7 +67,6 @@ async function firebaseLogin(email, password) {
     try {
         const userCredential = await fbAuth.signInWithEmailAndPassword(email, password);
         console.log('✅ Connexion Firebase réussie');
-        // dbStartSync sera appelé via onAuthStateChanged
         return { ok: true, user: userCredential.user };
     } catch (e) {
         console.error('❌ Erreur connexion :', e);
@@ -102,39 +101,48 @@ async function firebaseLogout() {
 // ============================================
 if (typeof fbAuth !== 'undefined' && fbAuth) {
     fbAuth.onAuthStateChanged(async (user) => {
+        const pseudoSection = document.getElementById('pseudo-section');
+        const registerForm = document.getElementById('register-form');
+        const loggedSection = document.getElementById('logged-section');
+        const userDisplay = document.getElementById('user-display');
+        const footerLinks = document.getElementById('footer-links');
+        const loginForm = document.getElementById('login-form');
+        const authCard = document.getElementById('auth-card');
+
         if (user) {
             console.log('👤 Utilisateur connecté :', user.email);
-            await dbStartSync(user);
 
-            // Si on est sur une page qui nécessite le pseudo
-            const pseudoSection = document.getElementById('pseudo-section');
-            const registerForm = document.getElementById('register-form');
-            const loggedSection = document.getElementById('logged-section');
-            const userDisplay = document.getElementById('user-display');
-            const footerLinks = document.getElementById('footer-links');
-            const loginForm = document.getElementById('login-form');
+            if (loginForm) loginForm.classList.add('hidden');
+            if (loggedSection) loggedSection.classList.remove('hidden');
+            if (footerLinks) footerLinks.classList.add('hidden');
+            if (userDisplay) userDisplay.textContent = user.email;
+
+            await dbStartSync(user);
 
             const users = getUsers();
             const u = users[user.email];
 
-            if (u && !u.pseudo && pseudoSection) {
-                // Doit choisir un pseudo
-                if (registerForm) registerForm.classList.add('hidden');
-                pseudoSection.classList.remove('hidden');
-                if (footerLinks) footerLinks.classList.add('hidden');
-            } else if (u && u.pseudo) {
-                // Connecté et a un pseudo
-                if (loginForm) loginForm.classList.add('hidden');
-                if (loggedSection) loggedSection.classList.remove('hidden');
-                if (footerLinks) footerLinks.classList.add('hidden');
-                if (userDisplay) userDisplay.textContent = u.pseudo || user.email;
-
-                // (Correction) Suppression de la redirection automatique vers index.html 
-                // pour permettre à l'utilisateur de consulter sa page profil / connexion tranquillement.
+            if (u) {
+                if (!u.pseudo && pseudoSection) {
+                    if (loggedSection) loggedSection.classList.add('hidden');
+                    if (registerForm) registerForm.classList.add('hidden');
+                    pseudoSection.classList.remove('hidden');
+                } else if (u.pseudo && userDisplay) {
+                    userDisplay.textContent = u.pseudo;
+                }
             }
         } else {
             console.log('👤 Aucun utilisateur connecté');
             dbStopSync();
+
+            if (loginForm) loginForm.classList.remove('hidden');
+            if (loggedSection) loggedSection.classList.add('hidden');
+            if (footerLinks) footerLinks.classList.remove('hidden');
+        }
+
+        // Rend la carte visible instantanément une fois l'état vérifié (supprime le flash visuel)
+        if (authCard) {
+            authCard.style.opacity = '1';
         }
     });
 }
@@ -209,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (errorMsg) errorMsg.textContent = "⏳ Vérification du pseudo...";
 
             try {
-                // Vérifie que le pseudo n'est pas déjà pris
                 const snapshot = await fbDb.collection('users').where('pseudo', '==', pseudoInput).get();
                 if (!snapshot.empty) {
                     let taken = false;
@@ -222,10 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Enregistre le pseudo dans Firestore
                 await fbDb.collection('users').doc(user.uid).update({ pseudo: pseudoInput });
 
-                // Met à jour le localStorage
                 const users = getUsers();
                 if (!users[user.email]) users[user.email] = {};
                 users[user.email].pseudo = pseudoInput;
