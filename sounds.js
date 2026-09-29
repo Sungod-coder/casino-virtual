@@ -1,21 +1,14 @@
 // sounds.js
 // Gestion centralisée des sons du casino.
 
-// Détecte automatiquement le bon chemin vers le dossier "sons/"
-// en se basant sur le chemin réel du fichier sounds.js
-const SOUND_BASE = (function() {
-    try {
-        const current = document.currentScript;
-        if (current && current.src) {
-            // Ex: "https://site.com/.../sons/../sounds.js" ou "../sounds.js"
-            return current.src.replace(/sounds\.js(\?.*)?$/, 'sons/');
-        }
-    } catch (e) {}
-    // Fallback : ancienne logique
+const IS_IN_SUBFOLDER = (function() {
     const path = window.location.pathname;
-    const sub = /\/(roulette|machineasous|blackjack|baccarat|craps|videopoker)\//i.test(path);
-    return sub ? '../sons/' : 'sons/';
+    return path.includes('/Roulette/') || path.includes('/MachineAsous/') ||
+           path.includes('/Blackjack/') || path.includes('/Baccarat/') ||
+           path.includes('/Craps/') || path.includes('/Videopoker/');
 })();
+
+const SOUND_BASE = IS_IN_SUBFOLDER ? '../sons/' : 'sons/';
 
 // ============================================================
 //   MUSIQUE D'AMBIANCE
@@ -197,7 +190,12 @@ function stopDiceSound() {
     } catch (e) {}
 }
 
+// ============================================================
+//   SON MACHINE À SOUS — avec fade robuste
+// ============================================================
 let slotSound = null;
+let slotSoundFadeInterval = null;
+
 function initSlotSound() {
     if (slotSound) return;
     try {
@@ -208,29 +206,74 @@ function initSlotSound() {
         slotSound.load();
     } catch (e) {}
 }
+
 function playSlotSound() {
     try {
         initSlotSound();
         if (!slotSound) return;
+
+        // 🛑 Clear tout fade en cours
+        if (slotSoundFadeInterval) {
+            clearInterval(slotSoundFadeInterval);
+            slotSoundFadeInterval = null;
+        }
+
         slotSound.volume = 0.9;
+
         const startPlaying = () => {
-            slotSound.currentTime = 0;
-            const p = slotSound.play();
-            if (p && typeof p.catch === 'function') p.catch(() => {});
+            try {
+                slotSound.currentTime = 0;
+                const p = slotSound.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+            } catch (e) {}
         };
+
         if (slotSound.readyState >= 1) startPlaying();
         else { slotSound.addEventListener('loadedmetadata', startPlaying, { once: true }); slotSound.load(); }
     } catch (e) {}
 }
+
 function stopSlotSound() {
     try {
         if (!slotSound) return;
-        if (!slotSound.paused) {
-            const fade = setInterval(() => {
-                if (slotSound.volume > 0.05) slotSound.volume -= 0.08;
-                else { clearInterval(fade); slotSound.pause(); slotSound.currentTime = 0; slotSound.volume = 0.9; }
-            }, 30);
+
+        // 🛑 Clear tout fade en cours
+        if (slotSoundFadeInterval) {
+            clearInterval(slotSoundFadeInterval);
+            slotSoundFadeInterval = null;
         }
+
+        const startVol = slotSound.volume;
+        let step = 0;
+        const steps = 8;
+
+        slotSoundFadeInterval = setInterval(() => {
+            step++;
+            if (!slotSound || step >= steps) {
+                clearInterval(slotSoundFadeInterval);
+                slotSoundFadeInterval = null;
+                try {
+                    slotSound.pause();
+                    slotSound.currentTime = 0;
+                    slotSound.volume = 0.9;
+                } catch (e) {}
+            } else {
+                try { slotSound.volume = startVol * (1 - step / steps); } catch (e) {}
+            }
+        }, 25);
+
+        // 🛑 Sécurité : force l'arrêt après 300ms max
+        setTimeout(() => {
+            if (slotSoundFadeInterval) {
+                clearInterval(slotSoundFadeInterval);
+                slotSoundFadeInterval = null;
+            }
+            try {
+                slotSound.pause();
+                slotSound.currentTime = 0;
+                slotSound.volume = 0.9;
+            } catch (e) {}
+        }, 300);
     } catch (e) {}
 }
 
@@ -295,10 +338,10 @@ function playCardSound() {
 }
 
 // ============================================================
-//   SON DE TIRAGE DU COFFRE (spin) — volume très réduit
+//   SON DE TIRAGE DU COFFRE (spin)
 // ============================================================
 let chestSpinSound = null;
-const CHEST_SPIN_VOLUME = 0.15;   // ✅ Volume réduit (était 0.35)
+const CHEST_SPIN_VOLUME = 0.15;
 const CHEST_SPIN_RATE_START = 1.6;
 const CHEST_SPIN_RATE_END = 0.35;
 
