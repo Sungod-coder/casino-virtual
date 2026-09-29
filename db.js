@@ -1,9 +1,10 @@
 // db.js
-// Sync SIMPLE et FIABLE : local → Firestore (pas de temps réel)
+// Sync FIABLE : sauvegarde immédiate + flag pending_save
 
 let __dbSyncReady = false;
 let __dbCurrentUser = null;
 let __dbSaveTimeout = null;
+let __dbLastSavePromise = null;
 
 function dbIsReady() { return __dbSyncReady && __dbCurrentUser !== null; }
 
@@ -19,7 +20,6 @@ function dbRefreshAllUI() {
     if (typeof updateRankButton === 'function') { try { updateRankButton(); } catch (e) {} }
     if (typeof shopUpdateUI === 'function') { try { shopUpdateUI(); } catch (e) {} }
 
-    // 🔄 Met à jour l'affichage du solde dans les jeux
     const balanceEl = document.getElementById('balance-val');
     if (balanceEl) {
         const users = JSON.parse(localStorage.getItem('casino_users')) || {};
@@ -31,7 +31,7 @@ function dbRefreshAllUI() {
 }
 
 // ============================================
-//   CHARGER Firestore → localStorage (au démarrage uniquement)
+//   CHARGER Firestore → localStorage
 // ============================================
 async function dbLoadUserToLocal(uid) {
     if (!fbDb) return null;
@@ -44,7 +44,6 @@ async function dbLoadUserToLocal(uid) {
         const email = data.email;
         if (!email) return null;
 
-        // On charge les données Firestore dans localStorage
         users[email] = {
             password: '__FIREBASE__',
             pseudo: data.pseudo || null,
@@ -60,7 +59,7 @@ async function dbLoadUserToLocal(uid) {
         localStorage.setItem('casino_logged_email', email);
         localStorage.setItem('casinoBalance', users[email].balance.toString());
 
-        console.log('✅ Firestore → localStorage OK (balance:', users[email].balance, ')');
+        console.log('✅ Firestore → localStorage (balance:', users[email].balance, ')');
         return email;
     } catch (e) {
         console.error('❌ dbLoadUserToLocal :', e);
@@ -93,14 +92,18 @@ async function dbSaveUserToCloud() {
             rankXP: u.rankXP || 0,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
+
+        // ✅ Sauvegarde réussie → on retire le flag
+        localStorage.removeItem('casino_pending_save');
         console.log('☁️ Sauvegardé (balance:', u.balance, ')');
     } catch (e) {
         console.error('❌ dbSaveUserToCloud :', e);
+        // ❌ Échec → le flag reste pour réessayer plus tard
     }
 }
 
 // ============================================
-//   DÉMARRAGE (au login uniquement)
+//   DÉMARRAGE
 // ============================================
 async function dbStartSync(user) {
     if (!user) return;
@@ -109,23 +112,29 @@ async function dbStartSync(user) {
     __dbSyncReady = false;
     console.log('🔄 Sync pour :', user.email);
 
-    // 1. Charger Firestore → localStorage
-    const email = await dbLoadUserToLocal(user.uid);
-    if (!email) {
-        console.warn('🛡️ Chargement Firestore échoué → on n\'écrase pas');
+    // 🛡️ VÉRIFICATION CRITIQUE : y a-t-il des modifs locales non sauvegardées ?
+    const pending = localStorage.getItem('casino_pending_save');
+    const hasPending = pending && (Date.now() - parseInt(pending, 10) < 300000); // < 5 min
+
+    if (hasPending) {
+        // ⚠️ Modifs locales récentes → on GARDE le local et on essaie de sauvegarder
+        console.log('🛡️ Modifs locales récentes → on garde le local et on envoie à Firestore');
+
+        __dbSyncReady = true;
+        dbRefreshAllUI();
+        await dbSaveUserToCloud(); // Retente la sauvegarde
+    } else {
+        // Charger Firestore normalement
+        await dbLoadUserToLocal(user.uid);
+        dbRefreshAllUI();
+        __dbSyncReady = true;
     }
 
-    // 2. Refresh UI
-    dbRefreshAllUI();
-
-    // 3. Marquer prêt
-    __dbSyncReady = true;
     console.log('✅ Sync active');
 }
 
 // ============================================
-//   WRAPPER localStorage.setItem
-//   Chaque écriture locale → sauvegarde Firestore (300ms debounce)
+//   WRAPPER localStorage.setItem (sauvegarde immédiate)
 // ============================================
 (function() {
     const originalSetItem = localStorage.setItem.bind(localStorage);
@@ -133,42 +142,41 @@ async function dbStartSync(user) {
         originalSetItem(key, value);
 
         if (key === 'casino_users' || key === 'casinoBalance') {
+            // 📌 Marquer qu'il y a des modifs en attente
+            originalSetItem('casino_pending_save', Date.now().toString());
+
             if (__dbSyncReady && __dbCurrentUser) {
+                // Sauvegarde immédiate (pas de debounce long)
                 clearTimeout(__dbSaveTimeout);
                 __dbSaveTimeout = setTimeout(() => {
                     dbSaveUserToCloud();
-                }, 300);
+                }, 100); // 100ms au lieu de 300ms
             }
         }
     };
 })();
 
 // ============================================
-//   Sauvegarde à la fermeture (au cas où)
+//   SAUVEGARDES DE SÉCURITÉ (avant fermeture)
 // ============================================
-window.addEventListener('beforeunload', () => {
+function forceSaveNow() {
     if (__dbSyncReady && __dbCurrentUser) {
-        // Écriture synchrone forcée (peut échouer mais on tente)
-        try {
-            const email = localStorage.getItem('casino_logged_email');
-            const users = JSON.parse(localStorage.getItem('casino_users')) || {};
-            const u = users[email];
-            if (u) {
-                fbDb.collection('users').doc(__dbCurrentUser.uid).set({
-                    balance: u.balance || 0,
-                    tickets: u.tickets || 0,
-                    inventory: u.inventory || {},
-                    bp: u.bp || {},
-                    weekly: u.weekly || {},
-                    rankXP: u.rankXP || 0
-                }, { merge: true });
-            }
-        } catch (e) {}
+        console.log('💾 Sauvegarde forcée (fermeture)');
+        dbSaveUserToCloud();
+    }
+}
+
+// 📱 Utiliser plusieurs events pour maximiser les chances
+window.addEventListener('beforeunload', forceSaveNow);
+window.addEventListener('pagehide', forceSaveNow);       // ← plus fiable sur mobile
+document.addEventListener('visibilitychange', () => {    // ← quand on change d'onglet
+    if (document.visibilityState === 'hidden') {
+        forceSaveNow();
     }
 });
 
 // ============================================
-//   AUTO-START : dès que l'utilisateur est détecté
+//   AUTO-START
 // ============================================
 if (typeof fbAuth !== 'undefined' && fbAuth) {
     fbAuth.onAuthStateChanged((user) => {
