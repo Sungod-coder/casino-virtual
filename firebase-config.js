@@ -1,12 +1,12 @@
 // firebase-config.js
 const firebaseConfig = {
-    apiKey: "AIzaSyD_LU1lAbrLRnaDwmuKYQl0vbtrW_CdFIIWc",
+    apiKey: "AIzaSyCZOz9F8Wdc86GtyZRqyXL3i0prUbQt9M",
     authDomain: "casino-virtual-a36b2.firebaseapp.com",
     projectId: "casino-virtual-a36b2",
     storageBucket: "casino-virtual-a36b2.firebasestorage.app",
     messagingSenderId: "572361352791",
-    appId: "1:572361352791:web:bf873a91641a4d6f952512",
-    measurementId: "G-2GKDKLCP75"
+    appId: "1:572361352791:web:34db420bb7165d7b952512",
+    measurementId: "G-4YXFBRT7HC"
 };
 
 if (typeof firebase !== 'undefined') {
