@@ -29,6 +29,9 @@ async function firebaseRegister(email, password, pseudo) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
+        // 🧹 Nettoie tout flag de sync pour éviter tout conflit
+        localStorage.removeItem('casino_pending_save');
+
         await dbLoadUserToLocal(user.uid);
         console.log('✅ Compte créé sur Firebase');
         return { ok: true, user };
@@ -62,16 +65,21 @@ async function firebaseLogin(email, password) {
 }
 
 // ============================================
-//   DÉCONNEXION
+//   DÉCONNEXION (AVEC NETTOYAGE COMPLET)
 // ============================================
 async function firebaseLogout() {
     try {
+        if (typeof dbStopSync === 'function') dbStopSync();
         await fbAuth.signOut();
-        dbStopSync();
+
+        // 🧹 NETTOYAGE COMPLET du localStorage
         localStorage.removeItem('casino_users');
         localStorage.removeItem('casino_logged_email');
         localStorage.removeItem('casinoBalance');
-        console.log('👋 Déconnecté');
+        localStorage.removeItem('casino_pending_save');   // ⚠️ ESSENTIEL
+        localStorage.removeItem('casino_active_potion');
+
+        console.log('👋 Déconnecté + localStorage nettoyé');
     } catch (e) {
         console.error('❌ Erreur déconnexion :', e);
     }
@@ -96,21 +104,22 @@ if (typeof fbAuth !== 'undefined' && fbAuth) {
             if (footerLinks) footerLinks.classList.add('hidden');
             if (userDisplay) userDisplay.textContent = user.email;
 
-            await dbStartSync(user);
-
-            const users = getUsers();
-            const u = users[user.email];
-
-            if (u && !u.pseudo && pseudoSection) {
-                if (loggedSection) loggedSection.classList.add('hidden');
-                if (registerForm) registerForm.classList.add('hidden');
-                pseudoSection.classList.remove('hidden');
-            } else if (u && u.pseudo && userDisplay) {
-                userDisplay.textContent = u.pseudo;
-            }
+            // La sync est démarrée automatiquement par db.js
+            // On attend juste que les données soient chargées
+            setTimeout(() => {
+                const users = getUsers();
+                const u = users[user.email];
+                if (u && !u.pseudo && pseudoSection) {
+                    if (loggedSection) loggedSection.classList.add('hidden');
+                    if (registerForm) registerForm.classList.add('hidden');
+                    pseudoSection.classList.remove('hidden');
+                } else if (u && u.pseudo && userDisplay) {
+                    userDisplay.textContent = u.pseudo;
+                }
+            }, 1500);
         } else {
             console.log('👤 Aucun utilisateur connecté');
-            dbStopSync();
+            if (typeof dbStopSync === 'function') dbStopSync();
             if (loginForm) loginForm.classList.remove('hidden');
             if (loggedSection) loggedSection.classList.add('hidden');
             if (footerLinks) footerLinks.classList.remove('hidden');
@@ -180,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (errorMsg) errorMsg.textContent = "⏳ Enregistrement du pseudo...";
 
             try {
-                // Enregistrement direct sans vérification bloquante de doublon pour éviter les erreurs de requêtes
                 await fbDb.collection('users').doc(user.uid).update({ pseudo: pseudoInput });
 
                 const users = getUsers();
