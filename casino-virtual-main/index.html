@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino - Lobby Principal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="battle-pass.css">
+    <link rel="stylesheet" href="no-select.css">
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-bar-home">
+            <button id="rank-btn" class="rank-btn" onclick="openRankModal()" title="Mon Rang"></button>
+        </div>
+        <div class="top-bar-left">
+            <a href="battle-pass.html" class="shop-link bp-link" title="Pass de Combat">
+                <span class="shop-icon-mini">⚔️</span>
+                <span>Pass</span>
+            </a>
+            <a href="boutique.html" class="shop-link" title="Boutique">
+                <span class="shop-icon-mini">🛒</span>
+                <span>Boutique</span>
+            </a>
+        </div>
+        <div class="top-bar-right">
+            <a href="connexion.html" class="profile-link" title="Mon Profil / Connexion">
+                <div class="profile-icon">👤</div>
+                <span id="profile-status">Connexion</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="lobby-container">
+        <header class="header-title">
+            <h1>LOBBY DES JEUX</h1>
+            <p>Choisissez votre jeu et tentez le Quitte ou Double !</p>
+            
+            <div class="global-balance-box">
+                <span class="label">SOLDE TOTAL</span>
+                <span id="global-balance" class="value">0 €</span>
+                <button id="reset-balance-btn" class="btn-reload" style="display: none;">🔄 RECHARGER (10 €)</button>
+            </div>
+        </header>
+
+        <main class="games-grid">
+            <div class="game-card">
+                <div class="card-banner roulette-banner">
+                    <img src="img/Roulette.jpg" alt="Roulette" class="banner-img">
+                    <span class="card-tag">POPULAIRE</span>
+                </div>
+                <div class="card-body">
+                    <h3>ROULETTE</h3>
+                    <p>Roulette des Couleurs & Multiplicateur Quitte ou Double !</p>
+                    <a href="Roulette/roulette.html" class="game-btn">JOUER MAINTENANT</a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="card-banner slot-banner">
+                    <img src="img/machineAsous.jpg" alt="Machine à sous" class="banner-img">
+                    <span class="card-tag">NOUVEAU</span>
+                </div>
+                <div class="card-body">
+                    <h3>MACHINE À SOUS</h3>
+                    <p>Alignez les symboles & accumulez les victoires en Quitte ou Double !</p>
+                    <a href="MachineAsous/machine.html" class="game-btn">JOUER MAINTENANT</a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="card-banner craps-banner">
+                    <img src="img/craps.jpg" alt="Craps" class="banner-img">
+                    <span class="card-tag">NOUVEAU</span>
+                </div>
+                <div class="card-body">
+                    <h3>CRAPS (DÉS)</h3>
+                    <p>Lancez les dés et misez sur les combinaisons gagnantes.</p>
+                    <a href="Craps/craps.html" class="game-btn">JOUER MAINTENANT</a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="card-banner blackjack-banner">
+                    <img src="img/Blackjack.jpg" alt="Blackjack" class="banner-img">
+                    <span class="card-tag">NOUVEAU</span>
+                </div>
+                <div class="card-body">
+                    <h3>BLACKJACK</h3>
+                    <p>Approchez-vous de 21 sans dépasser et battez le croupier !</p>
+                    <a href="Blackjack/blackjack.html" class="game-btn">JOUER MAINTENANT</a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="card-banner baccarat-banner">
+                    <img src="img/baccarat.jpg" alt="Baccarat" class="banner-img">
+                    <span class="card-tag">NOUVEAU</span>
+                </div>
+                <div class="card-body">
+                    <h3>BACCARAT</h3>
+                    <p>Pariez sur le Joueur ou le Banquier. Le plus proche de 9 gagne !</p>
+                    <a href="Baccarat/baccarat.html" class="game-btn">JOUER MAINTENANT</a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="card-banner poker-banner">
+                    <img src="img/videopoker.png" alt="Video Poker" class="banner-img">
+                    <span class="card-tag">NOUVEAU</span>
+                </div>
+                <div class="card-body">
+                    <h3>VIDEO POKER</h3>
+                    <p>Gardez les bonnes cartes et visez la Quinte Flush Royale !</p>
+                    <a href="Videopoker/poker.html" class="game-btn">JOUER MAINTENANT</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ====== BOUTON RÉCOMPENSES HEBDO ====== -->
+    <button id="weekly-btn" class="weekly-btn" onclick="openWeeklyModal()" title="Récompenses Hebdomadaires">
+        <span class="weekly-btn-icon">🎁</span>
+        <span id="weekly-btn-badge" class="weekly-btn-badge">7</span>
+    </button>
+
+    <!-- ====== MODAL RÉCOMPENSES HEBDO ====== -->
+    <div id="weekly-modal" class="weekly-modal">
+        <div class="weekly-modal-content">
+            <button class="weekly-modal-close" onclick="closeWeeklyModal()">✕</button>
+
+            <div class="weekly-modal-header">
+                <div class="weekly-modal-title">Daily Reward!</div>
+                <div class="weekly-modal-subtitle">Connecte-toi chaque jour pour récupérer tes récompenses !</div>
+            </div>
+
+            <div id="weekly-grid" class="weekly-grid"></div>
+        </div>
+    </div>
+
+    <!-- ====== MODAL RANGS ====== -->
+    <div id="rank-modal" class="rank-modal">
+        <div class="rank-modal-content">
+            <button class="rank-modal-close" onclick="closeRankModal()">✕</button>
+            <div class="rank-modal-header">
+                <div class="rank-modal-title">MES RANGS</div>
+                <div class="rank-modal-subtitle">Gagne de l'XP en jouant pour monter en rang !</div>
+            </div>
+            <div id="rank-modal-content"></div>
+        </div>
+    </div>
+
+    <!-- ====== OVERLAY COFFRE (Jour 7) ====== -->
+    <div id="chest-overlay" class="chest-overlay">
+        <div class="chest-title">🎁 Ouverture du Coffre...</div>
+
+        <div class="chest-roller-wrap">
+            <div class="chest-center-line"></div>
+            <div id="chest-roller" class="chest-roller"></div>
+            <div id="chest-shine" class="chest-shine"></div>
+        </div>
+
+        <div id="chest-result" class="chest-result">
+            <div id="chest-result-title" class="chest-result-title"></div>
+            <div id="chest-result-text" class="chest-result-text"></div>
+        </div>
+
+        <button id="chest-continue-btn" class="chest-continue-btn" onclick="closeChestOverlay()">SUPER !</button>
+    </div>
+
+    <!-- 🔥 FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="db.js"></script>
+
+    <!-- Scripts du jeu -->
+    <script src="battle-pass.js"></script>
+    <script src="rank.js"></script>
+    <script src="potion.js"></script>
+    <script src="main.js"></script>
+    <script src="shop.js"></script>
+    <script src="sounds.js"></script>
+    <script src="weekly-rewards.js"></script>
+</body>
+</html>

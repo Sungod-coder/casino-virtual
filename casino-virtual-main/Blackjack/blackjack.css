@@ -1,0 +1,591 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #0d0f1b;
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 1100px;
+    background: #16192b;
+    border-radius: 16px;
+    border: 1px solid #2a2e4a;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    padding: 24px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #2a2e4a;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+}
+
+.btn-back {
+    color: #f1c40f;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 2px solid #f1c40f;
+    padding: 8px 16px;
+    border-radius: 30px;
+    transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+    background-color: #f1c40f;
+    color: #111;
+}
+
+.logo-title h1 {
+    font-size: 1.8rem;
+    color: #f1c40f;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.logo-title .subtitle {
+    font-size: 0.8rem;
+    color: #38ef7d;
+    letter-spacing: 3px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.balance-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.balance-box {
+    background: #0d0f1b;
+    border: 1px solid #f1c40f;
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.balance-box .label {
+    font-size: 0.65rem;
+    color: #888;
+}
+
+.balance-box .value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2ecc71;
+}
+
+.btn-reload {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-reload:hover {
+    background: #c0392b;
+}
+
+.game-layout {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 900px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.table-section {
+    background: radial-gradient(ellipse at center, #0a5c2e 0%, #043a1c 100%);
+    border: 4px solid #8b5a2b;
+    border-radius: 20px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-height: 500px;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.hand-zone {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hand-zone h3 {
+    font-size: 0.95rem;
+    color: #f1c40f;
+    letter-spacing: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+}
+
+.hand-zone h3 .score {
+    background: #0d0f1b;
+    color: #2ecc71;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.hand {
+    display: flex;
+    gap: 10px;
+    min-height: 130px;
+    align-items: center;
+    padding: 5px;
+    flex-wrap: wrap;
+}
+
+/* --- CARTES --- */
+.card {
+    width: 80px;
+    height: 115px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6px;
+    color: #111;
+    font-weight: bold;
+    animation: cardDeal 0.4s ease-out;
+    transform-origin: center;
+    border: 1px solid #ddd;
+}
+
+@keyframes cardDeal {
+    0% {
+        transform: translateY(-300px) rotate(-180deg) scale(0.3);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+.card.red { color: #e74c3c; }
+.card.black { color: #111; }
+
+.card .corner {
+    font-size: 1rem;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card .corner.bottom {
+    transform: rotate(180deg);
+    align-self: flex-end;
+}
+
+.card .center-suit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.2rem;
+}
+
+/* Dos de carte */
+.card.back {
+    background: repeating-linear-gradient(
+        45deg,
+        #1e3a8a,
+        #1e3a8a 8px,
+        #1e40af 8px,
+        #1e40af 16px
+    );
+    border: 2px solid #fff;
+}
+
+.card.back .center-suit { display: none; }
+
+.table-info-box {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #f1c40f;
+}
+
+.status-text {
+    font-size: 1rem;
+    color: #f1c40f;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.control-section {
+    background: #0d0f1b;
+    border: 1px solid #2a2e4a;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.control-section h3 {
+    font-size: 1rem;
+    color: #aaa;
+    margin-bottom: 16px;
+}
+
+.chip-selector {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px dashed #fff;
+    background: #34495e;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.chip:hover {
+    transform: scale(1.1);
+}
+
+.chip.active {
+    border-style: solid;
+    border-color: #f1c40f;
+    box-shadow: 0 0 12px rgba(241, 196, 15, 0.6);
+    transform: scale(1.1);
+}
+
+.chip[data-value="5"] { background: #e67e22; }
+.chip[data-value="10"] { background: #3498db; }
+.chip[data-value="25"] { background: #9b59b6; }
+.chip[data-value="50"] { background: #e74c3c; }
+.chip[data-value="100"] { background: #1abc9c; }
+
+.bet-info {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.bet-info span {
+    color: #f1c40f;
+    font-weight: bold;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 10px;
+}
+
+.deal-btn {
+    background: linear-gradient(135deg, #f1c40f, #d35400);
+    color: #111;
+}
+
+.deal-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.6);
+}
+
+.deal-btn:disabled {
+    background: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.hit-btn {
+    background: #3498db;
+    color: white;
+}
+
+.hit-btn:hover:not(:disabled) {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.stand-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.stand-btn:hover:not(:disabled) {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+.action-btn:disabled {
+    background: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.message-box {
+    background: #0d0f1b;
+    border-left: 4px solid #f1c40f;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    color: #fff;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   RESPONSIVE — BLACKJACK
+   ============================================ */
+@media (max-width: 900px) {
+    .app-container {
+        padding: 18px;
+    }
+
+    .game-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .table-section {
+        padding: 20px;
+        min-height: 400px;
+    }
+
+    .controls-panel {
+        gap: 16px;
+    }
+
+    header {
+        flex-direction: column;
+        gap: 14px;
+        text-align: center;
+    }
+
+    .btn-back {
+        align-self: center;
+    }
+
+    .logo-title h1 {
+        font-size: 1.4rem;
+    }
+
+    .balance-container {
+        justify-content: center;
+    }
+
+    .hand-zone h3 {
+        font-size: 0.85rem;
+    }
+
+    .card {
+        width: 70px;
+        height: 100px;
+    }
+
+    .card .corner {
+        font-size: 0.9rem;
+    }
+
+    .card .center-suit {
+        font-size: 1.9rem;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 12px;
+        align-items: flex-start;
+    }
+
+    .app-container {
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    header {
+        padding-bottom: 14px;
+        margin-bottom: 16px;
+    }
+
+    .logo-title h1 {
+        font-size: 1.15rem;
+        letter-spacing: 1px;
+    }
+
+    .logo-title .subtitle {
+        font-size: 0.65rem;
+        letter-spacing: 2px;
+    }
+
+    .balance-box {
+        padding: 6px 12px;
+    }
+
+    .balance-box .value {
+        font-size: 1rem;
+    }
+
+    .btn-reload {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+
+    .table-section {
+        padding: 14px;
+        min-height: 340px;
+        border-width: 3px;
+    }
+
+    .hand {
+        min-height: 100px;
+        gap: 6px;
+    }
+
+    .hand-zone h3 {
+        font-size: 0.78rem;
+        letter-spacing: 1px;
+    }
+
+    .hand-zone h3 .score {
+        font-size: 0.85rem;
+        padding: 2px 10px;
+    }
+
+    .card {
+        width: 58px;
+        height: 82px;
+        padding: 4px;
+    }
+
+    .card .corner {
+        font-size: 0.75rem;
+    }
+
+    .card .center-suit {
+        font-size: 1.5rem;
+    }
+
+    .table-info-box {
+        padding: 10px;
+    }
+
+    .status-text {
+        font-size: 0.85rem;
+    }
+
+    .control-section {
+        padding: 14px;
+    }
+
+    .control-section h3 {
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+    }
+
+    .chip-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .chip {
+        width: 44px;
+        height: 44px;
+        font-size: 0.8rem;
+    }
+
+    .bet-info {
+        font-size: 0.85rem;
+    }
+
+    .action-btn {
+        padding: 12px;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .message-box {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+        min-height: 50px;
+    }
+}
+
+@media (max-width: 400px) {
+    .logo-title h1 {
+        font-size: 1rem;
+    }
+
+    .card {
+        width: 50px;
+        height: 72px;
+    }
+
+    .card .corner {
+        font-size: 0.7rem;
+    }
+
+    .card .center-suit {
+        font-size: 1.3rem;
+    }
+
+    .chip {
+        width: 40px;
+        height: 40px;
+        font-size: 0.75rem;
+    }
+}

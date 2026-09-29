@@ -1,0 +1,705 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+}
+
+/* 🖥️ PC : centré verticalement et horizontalement */
+body {
+    background-color: #0d0f1b;
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    width: 100%;
+}
+
+/* 📱 MOBILE / TABLETTE : block pour éviter le bug de layout */
+@media (max-width: 900px) {
+    body {
+        display: block;
+        padding: 10px;
+        align-items: stretch;
+    }
+}
+
+.app-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #16192b;
+    border-radius: 16px;
+    border: 1px solid #2a2e4a;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    padding: 24px;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #2a2e4a;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-back {
+    color: #f1c40f;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 2px solid #f1c40f;
+    padding: 8px 16px;
+    border-radius: 30px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-back:hover {
+    background-color: #f1c40f;
+    color: #111;
+}
+
+.logo-title {
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.logo-title h1 {
+    font-size: 1.8rem;
+    color: #f1c40f;
+    letter-spacing: 2px;
+}
+
+.logo-title .subtitle {
+    font-size: 0.8rem;
+    color: #e74c3c;
+    letter-spacing: 4px;
+    font-weight: bold;
+}
+
+.balance-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.balance-box {
+    background: #0d0f1b;
+    border: 1px solid #f1c40f;
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.balance-box .label {
+    font-size: 0.65rem;
+    color: #888;
+}
+
+.balance-box .value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2ecc71;
+}
+
+.btn-reload {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-reload:hover {
+    background: #c0392b;
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.game-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.slot-machine-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    min-width: 0;
+}
+
+.slot-machine {
+    background: linear-gradient(145deg, #1f233e, #0f1120);
+    border: 4px solid #f1c40f;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 0 30px rgba(241, 196, 15, 0.2);
+    width: 100%;
+    max-width: 420px;
+}
+
+.slot-window {
+    background: #000;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    position: relative;
+    border: 2px solid #333;
+    overflow: hidden;
+}
+
+.reel-container {
+    width: 30%;
+    height: 120px;
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #333;
+    contain: strict;
+}
+
+.reel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    will-change: transform;
+}
+
+.symbol {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.payline-indicator {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(231, 76, 60, 0.6);
+    box-shadow: 0 0 8px #e74c3c;
+    pointer-events: none;
+}
+
+.payout-table {
+    background: #0d0f1b;
+    border: 1px solid #2a2e4a;
+    border-radius: 12px;
+    padding: 16px;
+    width: 100%;
+    max-width: 420px;
+}
+
+.payout-table h4 {
+    font-size: 0.85rem;
+    color: #f1c40f;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.payout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.payout-item {
+    background: #16192b;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payout-item.full-width {
+    grid-column: span 2;
+    background: #22263d;
+}
+
+.payout-item strong {
+    color: #2ecc71;
+}
+
+/* ============================================
+   CONTRÔLES
+   ============================================ */
+.controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+.control-section {
+    background: #0d0f1b;
+    border: 1px solid #2a2e4a;
+    border-radius: 12px;
+    padding: 20px;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.control-section h3 {
+    font-size: 1rem;
+    color: #aaa;
+    margin-bottom: 16px;
+}
+
+.chip-selector {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.chip {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px dashed #fff;
+    background: #34495e;
+    color: white;
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.chip:hover {
+    transform: scale(1.1);
+}
+
+.chip.active {
+    border-style: solid;
+    border-color: #f1c40f;
+    box-shadow: 0 0 12px rgba(241, 196, 15, 0.6);
+    transform: scale(1.1);
+}
+
+.chip[data-value="1"] { background: #3498db; }
+.chip[data-value="5"] { background: #e67e22; }
+.chip[data-value="25"] { background: #9b59b6; }
+.chip[data-value="100"] { background: #1abc9c; }
+.chip[data-value="500"] { background: #e74c3c; }
+
+.bet-info {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    color: #ccc;
+}
+
+.bet-info span {
+    color: #f1c40f;
+    font-weight: bold;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.spin-btn {
+    background: #2ecc71;
+    color: #111;
+}
+
+.spin-btn:hover:not(:disabled) {
+    background: #27ae60;
+}
+
+.spin-btn:disabled {
+    background: #555;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.streak-info-box {
+    background: #16192b;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.streak-stat {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.streak-stat.highlight strong { color: #f1c40f; font-size: 1.1rem; }
+.streak-stat.next strong { color: #2ecc71; }
+
+.streak-instruction {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.streak-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.double-btn {
+    background: #e67e22;
+    color: white;
+    flex: 1;
+}
+
+.double-btn:hover { background: #d35400; }
+
+.cashout-btn {
+    background: #2ecc71;
+    color: #111;
+    flex: 1;
+}
+
+.cashout-btn:hover { background: #27ae60; }
+
+.message-box {
+    background: #0d0f1b;
+    border-left: 4px solid #f1c40f;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    color: #fff;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.history-panel h4 {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.history-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    max-width: 100%;
+}
+
+.history-item {
+    background: #0d0f1b;
+    border: 1px solid #2a2e4a;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 1rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   RESPONSIVE — TABLETTE
+   ============================================ */
+@media (max-width: 900px) {
+    .app-container {
+        padding: 16px;
+    }
+
+    .game-layout {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        text-align: center;
+        padding-bottom: 16px;
+        margin-bottom: 18px;
+    }
+
+    .btn-back {
+        align-self: center;
+        font-size: 0.82rem;
+        padding: 8px 16px;
+        order: -1;
+    }
+
+    .logo-title {
+        order: 0;
+        width: 100%;
+    }
+
+    .logo-title h1 {
+        font-size: 1.5rem;
+        letter-spacing: 1.5px;
+    }
+
+    .logo-title .subtitle {
+        font-size: 0.72rem;
+        letter-spacing: 3px;
+    }
+
+    .balance-container {
+        order: 1;
+        justify-content: center;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .balance-box {
+        align-items: center;
+        padding: 8px 18px;
+    }
+
+    .balance-box .value {
+        font-size: 1.1rem;
+    }
+
+    .slot-machine {
+        max-width: 100%;
+        padding: 18px;
+    }
+
+    .payout-table {
+        max-width: 100%;
+    }
+
+    .controls-panel {
+        gap: 16px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE — MOBILE
+   ============================================ */
+@media (max-width: 600px) {
+    .app-container {
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    header {
+        padding-bottom: 12px;
+        margin-bottom: 14px;
+        gap: 10px;
+    }
+
+    .btn-back {
+        font-size: 0.75rem;
+        padding: 7px 14px;
+    }
+
+    .logo-title h1 {
+        font-size: 1.25rem;
+        letter-spacing: 1px;
+    }
+
+    .logo-title .subtitle {
+        font-size: 0.65rem;
+        letter-spacing: 2px;
+    }
+
+    .balance-box {
+        padding: 6px 14px;
+    }
+
+    .balance-box .label {
+        font-size: 0.6rem;
+    }
+
+    .balance-box .value {
+        font-size: 1rem;
+    }
+
+    .btn-reload {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+
+    .slot-machine {
+        padding: 14px;
+        border-width: 3px;
+    }
+
+    .slot-window {
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .reel-container {
+        height: 90px;
+    }
+
+    .symbol {
+        height: 90px;
+        font-size: 2.5rem;
+    }
+
+    .payout-table {
+        padding: 12px;
+    }
+
+    .payout-table h4 {
+        font-size: 0.72rem;
+    }
+
+    .payout-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .payout-item {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+    }
+
+    .payout-item.full-width {
+        grid-column: span 1;
+    }
+
+    .control-section {
+        padding: 14px;
+    }
+
+    .control-section h3 {
+        font-size: 0.82rem;
+        margin-bottom: 12px;
+    }
+
+    .chip-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .chip {
+        width: 44px;
+        height: 44px;
+        font-size: 0.78rem;
+    }
+
+    .action-btn {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    .streak-info-box {
+        padding: 10px;
+    }
+
+    .streak-stat {
+        font-size: 0.85rem;
+    }
+
+    .streak-instruction {
+        font-size: 0.78rem;
+    }
+
+    .streak-actions {
+        flex-direction: column;
+    }
+
+    .double-btn,
+    .cashout-btn {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .history-item {
+        font-size: 0.85rem;
+        padding: 4px 8px;
+    }
+
+    .message-box {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+        min-height: 42px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE — PETIT MOBILE
+   ============================================ */
+@media (max-width: 400px) {
+    .logo-title h1 {
+        font-size: 1.1rem;
+    }
+
+    .reel-container {
+        height: 75px;
+    }
+
+    .symbol {
+        height: 75px;
+        font-size: 2rem;
+    }
+
+    .chip {
+        width: 40px;
+        height: 40px;
+        font-size: 0.72rem;
+    }
+
+    .slot-machine {
+        padding: 10px;
+    }
+}

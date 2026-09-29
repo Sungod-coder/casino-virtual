@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pass de Combat - Casino Virtual</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="battle-pass.css">
+    <link rel="stylesheet" href="no-select.css">
+</head>
+<body class="bp-body">
+
+    <div class="bp-container">
+        <a href="index.html" class="btn-back-shop">← RETOUR AU LOBBY</a>
+
+        <header class="bp-header">
+            <div class="bp-season-badge">
+                <span class="bp-season-icon">🎰</span>
+                <div>
+                    <div class="bp-season-label">SAISON <span id="bp-season-number">1</span></div>
+                    <div class="bp-season-days"><span id="bp-days-remaining">30</span> jours restants</div>
+                </div>
+            </div>
+
+            <h1 class="bp-title">PASS DE COMBAT</h1>
+
+            <div class="bp-balances">
+                <div class="bp-balance-item">
+                    <span class="label">SOLDE :</span>
+                    <span id="bp-balance-val" class="value">0 €</span>
+                </div>
+                <div class="bp-balance-item">
+                    <span class="label">🎫 TICKETS :</span>
+                    <span id="bp-tickets-val" class="value tickets">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="bp-progress-wrap">
+            <div class="bp-progress-header">
+                <span class="bp-level-badge">NIVEAU <strong id="bp-current-level">1</strong> / 100</span>
+                <span class="bp-xp-text"><span id="bp-current-xp">0</span> XP</span>
+            </div>
+            <div class="bp-progress-bar">
+                <div id="bp-progress-fill" class="bp-progress-fill"></div>
+            </div>
+            <div class="bp-progress-info">
+                <span id="bp-xp-to-next">300 XP pour le niveau suivant</span>
+                <span id="bp-premium-status">Pass Gratuit</span>
+            </div>
+        </div>
+
+        <div class="bp-claim-all-wrap">
+            <button id="bp-claim-all-btn" class="bp-claim-all-btn" type="button">
+                🎁 TOUT RÉCLAMER
+            </button>
+            <span id="bp-claim-all-count" class="bp-claim-all-count"></span>
+        </div>
+
+        <div class="bp-scroll-container">
+            <div class="bp-track">
+                <div class="bp-labels">
+                    <div class="bp-label premium-label">👑 PREMIUM</div>
+                    <div class="bp-label free-label">🎁 GRATUIT</div>
+                </div>
+                <div id="bp-grid" class="bp-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔥 FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="db.js"></script>
+
+    <script src="battle-pass.js"></script>
+    <script src="main.js"></script>
+    <script src="battle-pass-page.js"></script>
+    <script src="sounds.js"></script>
+</body>
+</html>

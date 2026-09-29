@@ -1,0 +1,44 @@
+/* Bouton "JOUER AVEC UN TICKET" */
+.ticket-btn {
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #ff3399, #ff007a);
+    color: #fff;
+    border: 2px solid #ff66a3;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(255, 0, 122, 0.5);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ticket-btn:hover:not(:disabled) {
+    transform: scale(1.03);
+    box-shadow: 0 6px 25px rgba(255, 0, 122, 0.9);
+}
+
+.ticket-btn:disabled {
+    background: #444;
+    color: #888;
+    border-color: #555;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+.ticket-btn .ticket-count {
+    background: #fff;
+    color: #ff007a;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 900;
+}
