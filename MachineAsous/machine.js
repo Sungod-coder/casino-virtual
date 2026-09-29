@@ -44,6 +44,7 @@ function setBalance(newAmount) {
 
 window.onload = () => {
     setupEventListeners();
+    setupResizeHandler();
     updateUI();
 };
 
@@ -125,6 +126,45 @@ function setupEventListeners() {
     if (reloadBtn) reloadBtn.addEventListener('click', reloadBalance);
 }
 
+// ✅ Resize handler : réinitialise la position des reels quand la fenêtre change de taille
+function setupResizeHandler() {
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (isSpinning) return;
+            resetReelsPosition();
+        }, 200);
+    });
+
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (isSpinning) return;
+            resetReelsPosition();
+        }, 300);
+    });
+}
+
+// ✅ Reset la position des 3 reels proprement
+function resetReelsPosition() {
+    const reels = [
+        document.getElementById('reel-1'),
+        document.getElementById('reel-2'),
+        document.getElementById('reel-3')
+    ];
+    reels.forEach(reel => {
+        if (!reel) return;
+        reel.style.transition = 'none';
+        reel.style.top = '0px';
+        // Ne garder que le dernier symbole
+        const symbols = reel.querySelectorAll('.symbol');
+        if (symbols.length > 0) {
+            const lastIcon = symbols[symbols.length - 1].textContent;
+            reel.innerHTML = `<div class="symbol">${lastIcon}</div>`;
+        }
+    });
+}
+
 function reloadBalance() {
     if (isSpinning) return;
     setBalance(10);
@@ -144,50 +184,66 @@ function getSymbolHeight() {
         const h = firstSymbol.offsetHeight;
         if (h > 0) return h;
     }
-    // Fallback selon la largeur de l'écran si aucun symbole n'est présent
     if (window.innerWidth <= 400) return 75;
     if (window.innerWidth <= 900) return 90;
     return 120;
 }
 
+// ✅ FIX : Nettoyage complet AVANT de lancer l'animation
 function spinReels(finalSymbols, onComplete) {
     const reels = [
         document.getElementById('reel-1'),
         document.getElementById('reel-2'),
         document.getElementById('reel-3')
     ];
-    let completed = 0;
 
-    if (typeof playSlotSound === 'function') { try { playSlotSound(); } catch (e) {} }
+    if (reels.some(r => !r)) return;
 
-    // ✅ Récupère la hauteur RÉELLE des symboles (responsive)
-    const symbolHeight = getSymbolHeight();
-    console.log('🎰 Hauteur symbole mesurée :', symbolHeight, 'px');
+    // 🛑 Stoppe tout son résiduel AVANT de commencer
+    if (typeof stopSlotSound === 'function') { try { stopSlotSound(); } catch (e) {} }
 
-    reels.forEach((reel, index) => {
-        const numExtra = 20 + index * 10;
-        const strip = [];
-        for (let i = 0; i < numExtra; i++) strip.push(SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)].icon);
-        strip.push(finalSymbols[index].icon);
-
-        reel.innerHTML = strip.map(icon => `<div class="symbol">${icon}</div>`).join('');
+    // 🔄 Reset les styles inline AVANT
+    reels.forEach(reel => {
         reel.style.transition = 'none';
         reel.style.top = '0px';
+    });
 
-        setTimeout(() => {
-            // ✅ Utilise la hauteur mesurée au lieu du 120px codé en dur
-            const targetTop = -(strip.length - 1) * symbolHeight;
-            const duration = 2000 + index * 600;
-            reel.style.transition = `top ${duration}ms cubic-bezier(0.1, 0.9, 0.2, 1.0)`;
-            reel.style.top = `${targetTop}px`;
+    let completed = 0;
+
+    // ⏱️ Attendre le prochain frame pour que le reset soit peint par le navigateur
+    requestAnimationFrame(() => {
+        const symbolHeight = getSymbolHeight();
+
+        // 🔊 Démarre le son après le reset
+        if (typeof playSlotSound === 'function') { try { playSlotSound(); } catch (e) {} }
+
+        reels.forEach((reel, index) => {
+            const numExtra = 20 + index * 10;
+            const strip = [];
+            for (let i = 0; i < numExtra; i++) strip.push(SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)].icon);
+            strip.push(finalSymbols[index].icon);
+
+            reel.innerHTML = strip.map(icon => `<div class="symbol">${icon}</div>`).join('');
+
+            // Force un reflow pour que le navigateur prenne en compte le nouveau contenu
+            reel.offsetHeight;
+
             setTimeout(() => {
-                completed++;
-                if (completed === 3) {
-                    if (typeof stopSlotSound === 'function') { try { stopSlotSound(); } catch (e) {} }
-                    onComplete();
-                }
-            }, duration);
-        }, 50);
+                const targetTop = -(strip.length - 1) * symbolHeight;
+                const duration = 2000 + index * 600;
+                reel.style.transition = `top ${duration}ms cubic-bezier(0.1, 0.9, 0.2, 1.0)`;
+                reel.style.top = `${targetTop}px`;
+
+                setTimeout(() => {
+                    completed++;
+                    if (completed === 3) {
+                        // 🛑 Stoppe le son quand tous les reels sont arrêtés
+                        if (typeof stopSlotSound === 'function') { try { stopSlotSound(); } catch (e) {} }
+                        onComplete();
+                    }
+                }, duration + 50);
+            }, 50);
+        });
     });
 }
 
@@ -260,13 +316,9 @@ function handleNormalResult(result) {
 
         const isThreeDiamonds = result[0].name === 'diamond' && result[1].name === 'diamond' && result[2].name === 'diamond';
         if (isThreeDiamonds) {
-            if (typeof playDiamondSound === 'function') {
-                try { playDiamondSound(); } catch (e) {}
-            }
+            if (typeof playDiamondSound === 'function') { try { playDiamondSound(); } catch (e) {} }
         } else {
-            if (typeof playSlotWinSound === 'function') {
-                try { playSlotWinSound(); } catch (e) {}
-            }
+            if (typeof playSlotWinSound === 'function') { try { playSlotWinSound(); } catch (e) {} }
         }
     } else {
         showMessage("PERDU ! Pas d'alignement gagnant.");
@@ -284,13 +336,9 @@ function handleStreakResult(result) {
 
         const isThreeDiamonds = result[0].name === 'diamond' && result[1].name === 'diamond' && result[2].name === 'diamond';
         if (isThreeDiamonds) {
-            if (typeof playDiamondSound === 'function') {
-                try { playDiamondSound(); } catch (e) {}
-            }
+            if (typeof playDiamondSound === 'function') { try { playDiamondSound(); } catch (e) {} }
         } else {
-            if (typeof playSlotWinSound === 'function') {
-                try { playSlotWinSound(); } catch (e) {}
-            }
+            if (typeof playSlotWinSound === 'function') { try { playSlotWinSound(); } catch (e) {} }
         }
     } else {
         showMessage("PERDU ! Série terminée.");
@@ -321,9 +369,7 @@ function cashout() {
     accumulatedGain = 0;
     streakCount = 0;
     updateUI();
-    if (typeof playCashRegister === 'function') {
-        try { playCashRegister(); } catch (e) {}
-    }
+    if (typeof playCashRegister === 'function') { try { playCashRegister(); } catch (e) {} }
 }
 
 function addHistory(text) {
