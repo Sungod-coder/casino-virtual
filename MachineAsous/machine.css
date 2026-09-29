@@ -5,19 +5,26 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* 🎯 Sécurité anti-débordement horizontal */
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+}
+
 body {
     background-color: #0d0f1b;
     color: #ffffff;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: block;
     padding: 20px;
+    width: 100%;
 }
 
 .app-container {
     width: 100%;
     max-width: 1100px;
+    margin: 0 auto;
     background: #16192b;
     border-radius: 16px;
     border: 1px solid #2a2e4a;
@@ -49,6 +56,7 @@ header {
     border-radius: 30px;
     transition: all 0.2s ease;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .btn-back:hover {
@@ -59,6 +67,7 @@ header {
 .logo-title {
     text-align: center;
     flex: 1;
+    min-width: 0;
 }
 
 .logo-title h1 {
@@ -78,6 +87,7 @@ header {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .balance-box {
@@ -130,6 +140,7 @@ header {
     flex-direction: column;
     gap: 20px;
     align-items: center;
+    min-width: 0;
 }
 
 .slot-machine {
@@ -162,6 +173,7 @@ header {
     overflow: hidden;
     position: relative;
     border: 1px solid #333;
+    contain: strict;
 }
 
 .reel {
@@ -171,6 +183,7 @@ header {
     position: absolute;
     width: 100%;
     top: 0;
+    will-change: transform;
 }
 
 .symbol {
@@ -180,6 +193,7 @@ header {
     justify-content: center;
     font-size: 3.5rem;
     user-select: none;
+    flex-shrink: 0;
 }
 
 .payline-indicator {
@@ -241,6 +255,7 @@ header {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
 }
 
 .control-section {
@@ -248,6 +263,9 @@ header {
     border: 1px solid #2a2e4a;
     border-radius: 12px;
     padding: 20px;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .control-section h3 {
@@ -346,6 +364,7 @@ header {
 .streak-stat {
     display: flex;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .streak-stat.highlight strong { color: #f1c40f; font-size: 1.1rem; }
@@ -356,6 +375,9 @@ header {
     color: #aaa;
     margin-bottom: 15px;
     line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 .streak-actions {
@@ -389,6 +411,8 @@ header {
     min-height: 48px;
     display: flex;
     align-items: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .history-panel h4 {
@@ -402,6 +426,7 @@ header {
     gap: 8px;
     overflow-x: auto;
     padding-bottom: 4px;
+    max-width: 100%;
 }
 
 .history-item {
@@ -411,6 +436,7 @@ header {
     border-radius: 6px;
     font-size: 1rem;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .hidden {
@@ -430,7 +456,6 @@ header {
         gap: 18px;
     }
 
-    /* 🎯 HEADER STACK VERTICAL PROPRE */
     header {
         flex-direction: column;
         align-items: stretch;
@@ -462,7 +487,6 @@ header {
         letter-spacing: 3px;
     }
 
-    /* 🎯 BALANCE BOX CENTRÉE ET VISIBLE */
     .balance-container {
         order: 1;
         justify-content: center;
@@ -499,13 +523,11 @@ header {
 @media (max-width: 600px) {
     body {
         padding: 10px;
-        align-items: flex-start;
     }
 
     .app-container {
         padding: 12px;
         border-radius: 14px;
-        margin-top: 8px;
     }
 
     header {
@@ -546,7 +568,6 @@ header {
         font-size: 0.75rem;
     }
 
-    /* 🎰 MACHINE */
     .slot-machine {
         padding: 14px;
         border-width: 3px;
@@ -566,7 +587,6 @@ header {
         font-size: 2.5rem;
     }
 
-    /* 📊 TABLE DES GAINS */
     .payout-table {
         padding: 12px;
     }
@@ -589,7 +609,6 @@ header {
         grid-column: span 1;
     }
 
-    /* 🎛️ CONTRÔLES */
     .control-section {
         padding: 14px;
     }
@@ -624,6 +643,10 @@ header {
         font-size: 0.85rem;
     }
 
+    .streak-instruction {
+        font-size: 0.78rem;
+    }
+
     .streak-actions {
         flex-direction: column;
     }
@@ -631,6 +654,7 @@ header {
     .double-btn,
     .cashout-btn {
         flex: 1 1 auto;
+        width: 100%;
     }
 
     .history-item {
