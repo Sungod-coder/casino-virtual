@@ -1,10 +1,10 @@
 // db.js
-// Sync FIABLE : sauvegarde immédiate + flag pending_save
+// Sauvegarde FIABLE avec REST API keepalive + retry
 
 let __dbSyncReady = false;
 let __dbCurrentUser = null;
-let __dbSaveTimeout = null;
-let __dbLastSavePromise = null;
+let __dbSaveInFlight = false;
+let __dbSaveQueued = false;
 
 function dbIsReady() { return __dbSyncReady && __dbCurrentUser !== null; }
 
@@ -68,37 +68,97 @@ async function dbLoadUserToLocal(uid) {
 }
 
 // ============================================
-//   SAUVEGARDER localStorage → Firestore
+//   SAUVEGARDE — Approche double (SDK + REST keepalive)
 // ============================================
 async function dbSaveUserToCloud() {
-    if (!__dbSyncReady || !__dbCurrentUser) return;
+    if (!__dbCurrentUser) return;
+
+    // Si une sauvegarde est déjà en cours, mettre en file d'attente
+    if (__dbSaveInFlight) {
+        __dbSaveQueued = true;
+        return;
+    }
+    __dbSaveInFlight = true;
 
     const email = localStorage.getItem('casino_logged_email');
-    if (!email) return;
+    if (!email) {
+        __dbSaveInFlight = false;
+        return;
+    }
 
     const users = JSON.parse(localStorage.getItem('casino_users')) || {};
     const u = users[email];
-    if (!u) return;
+    if (!u) {
+        __dbSaveInFlight = false;
+        return;
+    }
+
+    const uid = __dbCurrentUser.uid;
+    const payload = {
+        email: email,
+        pseudo: u.pseudo || null,
+        balance: u.balance || 0,
+        tickets: u.tickets || 0,
+        inventory: u.inventory || {},
+        bp: u.bp || { xp: 0, claimedFree: [], claimedPremium: [], season: 1 },
+        weekly: u.weekly || { weekStartDate: Date.now(), lastClaimTime: null, claimed: [] },
+        rankXP: u.rankXP || 0
+    };
+
+    console.log('💾 Tentative de sauvegarde... balance =', payload.balance);
 
     try {
-        await fbDb.collection('users').doc(__dbCurrentUser.uid).set({
-            email: email,
-            pseudo: u.pseudo || null,
-            balance: u.balance || 0,
-            tickets: u.tickets || 0,
-            inventory: u.inventory || {},
-            bp: u.bp || { xp: 0, claimedFree: [], claimedPremium: [], season: 1 },
-            weekly: u.weekly || { weekStartDate: Date.now(), lastClaimTime: null, claimed: [] },
-            rankXP: u.rankXP || 0,
+        // ✅ Tentative 1 : SDK Firebase (peut être annulée si on navigue)
+        await fbDb.collection('users').doc(uid).set({
+            ...payload,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
-        // ✅ Sauvegarde réussie → on retire le flag
         localStorage.removeItem('casino_pending_save');
-        console.log('☁️ Sauvegardé (balance:', u.balance, ')');
+        console.log('☁️ ✅ Sauvegardé via SDK (balance:', payload.balance, ')');
     } catch (e) {
-        console.error('❌ dbSaveUserToCloud :', e);
-        // ❌ Échec → le flag reste pour réessayer plus tard
+        console.error('❌ SDK save échoué:', e);
+
+        // ⚡ Tentative 2 : REST API avec keepalive (survit à la navigation)
+        try {
+            const token = await __dbCurrentUser.getIdToken();
+            const projectId = firebase.app().options.projectId;
+            const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}?updateMask.fieldPaths=balance&updateMask.fieldPaths=tickets&updateMask.fieldPaths=rankXP&updateMask.fieldPaths=bp&updateMask.fieldPaths=weekly&updateMask.fieldPaths=inventory&updateMask.fieldPaths=pseudo&updateMask.fieldPaths=email`;
+
+            const body = {
+                fields: {
+                    email: { stringValue: email },
+                    pseudo: { stringValue: u.pseudo || '' },
+                    balance: { integerValue: String(u.balance || 0) },
+                    tickets: { integerValue: String(u.tickets || 0) },
+                    rankXP: { integerValue: String(u.rankXP || 0) },
+                    inventory: { stringValue: JSON.stringify(u.inventory || {}) },
+                    bp: { stringValue: JSON.stringify(u.bp || {}) },
+                    weekly: { stringValue: JSON.stringify(u.weekly || {}) }
+                }
+            };
+
+            await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body),
+                keepalive: true // 🔥 SURVIT À LA NAVIGATION
+            });
+
+            localStorage.removeItem('casino_pending_save');
+            console.log('☁️ ✅ Sauvegardé via REST (balance:', payload.balance, ')');
+        } catch (e2) {
+            console.error('❌ REST save échoué aussi:', e2);
+        }
+    } finally {
+        __dbSaveInFlight = false;
+        if (__dbSaveQueued) {
+            __dbSaveQueued = false;
+            setTimeout(dbSaveUserToCloud, 50);
+        }
     }
 }
 
@@ -110,31 +170,28 @@ async function dbStartSync(user) {
 
     __dbCurrentUser = user;
     __dbSyncReady = false;
-    console.log('🔄 Sync pour :', user.email);
+    console.log('🔄 Sync pour :', user.email, '| UID:', user.uid);
 
-    // 🛡️ VÉRIFICATION CRITIQUE : y a-t-il des modifs locales non sauvegardées ?
+    // Si modifs locales en attente → sauvegarde immédiate
     const pending = localStorage.getItem('casino_pending_save');
-    const hasPending = pending && (Date.now() - parseInt(pending, 10) < 300000); // < 5 min
-
-    if (hasPending) {
-        // ⚠️ Modifs locales récentes → on GARDE le local et on essaie de sauvegarder
-        console.log('🛡️ Modifs locales récentes → on garde le local et on envoie à Firestore');
-
+    if (pending && (Date.now() - parseInt(pending, 10) < 300000)) {
+        console.log('🛡️ Modifs en attente → sauvegarde d\'abord');
         __dbSyncReady = true;
+        await dbSaveUserToCloud();
         dbRefreshAllUI();
-        await dbSaveUserToCloud(); // Retente la sauvegarde
-    } else {
-        // Charger Firestore normalement
-        await dbLoadUserToLocal(user.uid);
-        dbRefreshAllUI();
-        __dbSyncReady = true;
+        console.log('✅ Sync active (local gardé)');
+        return;
     }
 
+    // Sinon charger Firestore
+    await dbLoadUserToLocal(user.uid);
+    dbRefreshAllUI();
+    __dbSyncReady = true;
     console.log('✅ Sync active');
 }
 
 // ============================================
-//   WRAPPER localStorage.setItem (sauvegarde immédiate)
+//   WRAPPER localStorage — SAUVEGARDE IMMÉDIATE
 // ============================================
 (function() {
     const originalSetItem = localStorage.setItem.bind(localStorage);
@@ -142,37 +199,33 @@ async function dbStartSync(user) {
         originalSetItem(key, value);
 
         if (key === 'casino_users' || key === 'casinoBalance') {
-            // 📌 Marquer qu'il y a des modifs en attente
+            // 📌 Marquer pour retry
             originalSetItem('casino_pending_save', Date.now().toString());
 
-            if (__dbSyncReady && __dbCurrentUser) {
-                // Sauvegarde immédiate (pas de debounce long)
-                clearTimeout(__dbSaveTimeout);
-                __dbSaveTimeout = setTimeout(() => {
-                    dbSaveUserToCloud();
-                }, 100); // 100ms au lieu de 300ms
+            if (__dbCurrentUser) {
+                // 🔥 SAUVEGARDE IMMÉDIATE — pas de debounce
+                dbSaveUserToCloud();
+            } else {
+                console.log('⏸️ Pas encore de user, save reportée');
             }
         }
     };
 })();
 
 // ============================================
-//   SAUVEGARDES DE SÉCURITÉ (avant fermeture)
+//   SAUVEGARDES DE SÉCURITÉ (mobile-friendly)
 // ============================================
-function forceSaveNow() {
-    if (__dbSyncReady && __dbCurrentUser) {
-        console.log('💾 Sauvegarde forcée (fermeture)');
+function forceSave() {
+    if (__dbCurrentUser) {
+        console.log('💾 Force save');
         dbSaveUserToCloud();
     }
 }
 
-// 📱 Utiliser plusieurs events pour maximiser les chances
-window.addEventListener('beforeunload', forceSaveNow);
-window.addEventListener('pagehide', forceSaveNow);       // ← plus fiable sur mobile
-document.addEventListener('visibilitychange', () => {    // ← quand on change d'onglet
-    if (document.visibilityState === 'hidden') {
-        forceSaveNow();
-    }
+window.addEventListener('pagehide', forceSave);            // 📱 mobile
+window.addEventListener('beforeunload', forceSave);        // 🖥️ desktop
+document.addEventListener('visibilitychange', () => {     // 📱 onglet caché
+    if (document.visibilityState === 'hidden') forceSave();
 });
 
 // ============================================
@@ -203,3 +256,4 @@ window.dbLoadUserToLocal = dbLoadUserToLocal;
 window.dbSaveUserToCloud = dbSaveUserToCloud;
 window.dbStartSync = dbStartSync;
 window.dbStopSync = dbStopSync;
+window.dbForceSave = forceSave;
