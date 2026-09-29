@@ -1,6 +1,6 @@
 // firebase-config.js
 const firebaseConfig = {
-    apiKey: "AIzaSyCZOz9F8Wdc86GtyZRqyXL3i0prUbQt9M",
+    apiKey: "AIzaSyCZOz9F8Wjdc86GtyZRqyXL3iOprUbQt9M",
     authDomain: "casino-virtual-a36b2.firebaseapp.com",
     projectId: "casino-virtual-a36b2",
     storageBucket: "casino-virtual-a36b2.firebasestorage.app",
