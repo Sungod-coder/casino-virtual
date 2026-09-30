@@ -164,6 +164,19 @@ function setupEventListeners() {
     const ticketBtn = document.getElementById('ticket-btn');
     if (ticketBtn) ticketBtn.addEventListener('click', () => {
         if (gameInProgress || currentBet === 0) return;
+
+        // 🎫 PLAFONNER la mise au solde
+        const balance = getBalance();
+        if (balance <= 0) {
+            showMessage("❌ Tu n'as pas de solde pour miser !");
+            return;
+        }
+        if (currentBet > balance) {
+            currentBet = balance;
+            updateUI();
+            showMessage(`🎫 Mise plafonnée à ${balance} (ton solde)`);
+        }
+
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
             showMessage("❌ Aucun ticket disponible !");
             return;
@@ -217,7 +230,6 @@ function startGame() {
     updateStatus(`Mise : ${currentBet} — À vous !`);
     showMessage("🎴 Cartes distribuées !");
 
-    // 🎵 Son de carte pour les 4 cartes distribuées (décalées)
     for (let i = 0; i < 4; i++) {
         setTimeout(() => {
             if (typeof playCardSound === 'function') playCardSound();
@@ -234,7 +246,6 @@ function playerHit() {
     if (!gameInProgress) return;
     playerHand.push(drawCard());
     renderHands(false);
-    // 🎵 Son de carte
     if (typeof playCardSound === 'function') playCardSound();
 
     const score = calculateScore(playerHand);
@@ -257,7 +268,6 @@ function playerStand() {
     updateStatus("Au tour du croupier...");
     showMessage("✋ Le croupier joue...");
 
-    // 🎵 Son de carte quand le croupier retourne sa carte cachée
     if (typeof playCardSound === 'function') playCardSound();
 
     const dealerPlay = setInterval(() => {
@@ -265,7 +275,6 @@ function playerStand() {
         if (s < 17) {
             dealerHand.push(drawCard());
             renderHands(true);
-            // 🎵 Son de carte
             if (typeof playCardSound === 'function') playCardSound();
         } else {
             clearInterval(dealerPlay);
