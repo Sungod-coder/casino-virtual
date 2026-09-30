@@ -108,6 +108,19 @@ function setupEventListeners() {
     const ticketBtn = document.getElementById('ticket-btn');
     if (ticketBtn) ticketBtn.addEventListener('click', () => {
         if (isSpinning || inStreak) return;
+
+        // 🎫 PLAFONNER la mise au solde
+        const balance = getBalance();
+        if (balance <= 0) {
+            showMessage("❌ Tu n'as pas de solde pour miser !");
+            return;
+        }
+        if (currentBet > balance) {
+            currentBet = balance;
+            updateUI();
+            showMessage(`🎫 Mise plafonnée à ${balance} (ton solde)`);
+        }
+
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
             showMessage("❌ Aucun ticket disponible !");
             return;
@@ -126,7 +139,6 @@ function setupEventListeners() {
     if (reloadBtn) reloadBtn.addEventListener('click', reloadBalance);
 }
 
-// ✅ Resize handler : réinitialise la position des reels quand la fenêtre change de taille
 function setupResizeHandler() {
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -145,7 +157,6 @@ function setupResizeHandler() {
     });
 }
 
-// ✅ Reset la position des 3 reels proprement
 function resetReelsPosition() {
     const reels = [
         document.getElementById('reel-1'),
@@ -156,7 +167,6 @@ function resetReelsPosition() {
         if (!reel) return;
         reel.style.transition = 'none';
         reel.style.top = '0px';
-        // Ne garder que le dernier symbole
         const symbols = reel.querySelectorAll('.symbol');
         if (symbols.length > 0) {
             const lastIcon = symbols[symbols.length - 1].textContent;
@@ -177,7 +187,6 @@ function reloadBalance() {
 
 function showMessage(msg) { const b = document.getElementById('message-box'); if (b) b.innerText = msg; }
 
-// ✅ Mesure la hauteur RÉELLE d'un symbole selon la taille de l'écran
 function getSymbolHeight() {
     const firstSymbol = document.querySelector('.reel .symbol');
     if (firstSymbol) {
@@ -189,7 +198,6 @@ function getSymbolHeight() {
     return 120;
 }
 
-// ✅ FIX : Nettoyage complet AVANT de lancer l'animation
 function spinReels(finalSymbols, onComplete) {
     const reels = [
         document.getElementById('reel-1'),
@@ -199,10 +207,8 @@ function spinReels(finalSymbols, onComplete) {
 
     if (reels.some(r => !r)) return;
 
-    // 🛑 Stoppe tout son résiduel AVANT de commencer
     if (typeof stopSlotSound === 'function') { try { stopSlotSound(); } catch (e) {} }
 
-    // 🔄 Reset les styles inline AVANT
     reels.forEach(reel => {
         reel.style.transition = 'none';
         reel.style.top = '0px';
@@ -210,11 +216,9 @@ function spinReels(finalSymbols, onComplete) {
 
     let completed = 0;
 
-    // ⏱️ Attendre le prochain frame pour que le reset soit peint par le navigateur
     requestAnimationFrame(() => {
         const symbolHeight = getSymbolHeight();
 
-        // 🔊 Démarre le son après le reset
         if (typeof playSlotSound === 'function') { try { playSlotSound(); } catch (e) {} }
 
         reels.forEach((reel, index) => {
@@ -225,7 +229,6 @@ function spinReels(finalSymbols, onComplete) {
 
             reel.innerHTML = strip.map(icon => `<div class="symbol">${icon}</div>`).join('');
 
-            // Force un reflow pour que le navigateur prenne en compte le nouveau contenu
             reel.offsetHeight;
 
             setTimeout(() => {
@@ -237,7 +240,6 @@ function spinReels(finalSymbols, onComplete) {
                 setTimeout(() => {
                     completed++;
                     if (completed === 3) {
-                        // 🛑 Stoppe le son quand tous les reels sont arrêtés
                         if (typeof stopSlotSound === 'function') { try { stopSlotSound(); } catch (e) {} }
                         onComplete();
                     }
