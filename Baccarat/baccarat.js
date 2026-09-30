@@ -175,6 +175,19 @@ function setupEventListeners() {
     const ticketBtn = document.getElementById('ticket-btn');
     if (ticketBtn) ticketBtn.addEventListener('click', () => {
         if (gameInProgress || currentBet.amount === 0) return;
+
+        // 🎫 PLAFONNER la mise au solde
+        const balance = getBalance();
+        if (balance <= 0) {
+            showMessage("❌ Tu n'as pas de solde pour miser !");
+            return;
+        }
+        if (currentBet.amount > balance) {
+            currentBet.amount = balance;
+            updateUI();
+            showMessage(`🎫 Mise plafonnée à ${balance} (ton solde)`);
+        }
+
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
             showMessage("❌ Aucun ticket disponible !");
             return;
@@ -214,7 +227,6 @@ function startGame() {
     updateUI();
     updateStatus("Distribution des cartes...");
 
-    // 🎵 Son de carte pour chaque carte distribuée (fonction globale de sounds.js)
     setTimeout(() => { playerHand.push(drawCard()); renderHands(); if (typeof playCardSound === 'function') playCardSound(); }, 200);
     setTimeout(() => { bankerHand.push(drawCard()); renderHands(); if (typeof playCardSound === 'function') playCardSound(); }, 600);
     setTimeout(() => { playerHand.push(drawCard()); renderHands(); if (typeof playCardSound === 'function') playCardSound(); }, 1000);
@@ -245,7 +257,6 @@ function resolveGame() {
         setTimeout(() => {
             playerHand.push(drawCard());
             renderHands();
-            // 🎵 Son de carte pour la 3ème carte du joueur
             if (typeof playCardSound === 'function') playCardSound();
             p = calculateScore(playerHand);
             updateStatus(`Joueur : ${p} — Banquier : ${b}`);
@@ -256,7 +267,6 @@ function resolveGame() {
         if (bDraw) {
             bankerHand.push(drawCard());
             renderHands();
-            // 🎵 Son de carte pour la 3ème carte du banquier
             if (typeof playCardSound === 'function') playCardSound();
             b = calculateScore(bankerHand);
             updateStatus(`Joueur : ${p} — Banquier : ${b}`);
