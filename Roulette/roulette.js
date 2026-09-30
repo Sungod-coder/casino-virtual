@@ -161,7 +161,6 @@ function updateUI() {
 window.addEventListener('storage', updateUI);
 
 function setupEventListeners() {
-    // ----- CHIPS -----
     document.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', (e) => {
             if (isSpinning || inStreak) return;
@@ -182,7 +181,6 @@ function setupEventListeners() {
         });
     });
 
-    // ----- CHAMP CUSTOM -----
     const customInput = document.getElementById('custom-bet-input');
     if (customInput) {
         customInput.addEventListener('focus', () => {
@@ -215,7 +213,6 @@ function setupEventListeners() {
         });
     }
 
-    // ----- BET SPOTS -----
     document.querySelectorAll('.bet-spot').forEach(spot => {
         spot.addEventListener('click', () => {
             if (isSpinning || inStreak) return;
@@ -233,19 +230,29 @@ function setupEventListeners() {
         });
     });
 
-    // ----- EFFACER -----
     const clearBtn = document.getElementById('clear-btn');
     if (clearBtn) clearBtn.addEventListener('click', clearBet);
 
-    // ----- LANCER -----
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) spinBtn.addEventListener('click', () => { usingTicket = false; startNormalSpin(); });
 
-    // ----- TICKET -----
     const ticketBtn = document.getElementById('ticket-btn');
     if (ticketBtn) ticketBtn.addEventListener('click', () => {
         if (isSpinning || inStreak) return;
         if (currentBet.amount === 0) { showMessage("❌ Sélectionnez d'abord une couleur et une mise !"); return; }
+
+        // 🎫 PLAFONNER la mise au solde
+        const balance = getBalance();
+        if (balance <= 0) {
+            showMessage("❌ Tu n'as pas de solde pour miser !");
+            return;
+        }
+        if (currentBet.amount > balance) {
+            currentBet.amount = balance;
+            updateUI();
+            showMessage(`🎫 Mise plafonnée à ${balance} (ton solde)`);
+        }
+
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
             showMessage("❌ Aucun ticket disponible !");
             return;
@@ -254,14 +261,12 @@ function setupEventListeners() {
         startNormalSpin();
     });
 
-    // ----- CASHOUT + DOUBLE -----
     const cashoutBtn = document.getElementById('cashout-btn');
     if (cashoutBtn) cashoutBtn.addEventListener('click', cashout);
 
     const doubleBtn = document.getElementById('double-btn');
     if (doubleBtn) doubleBtn.addEventListener('click', startStreakSpin);
 
-    // ----- RELOAD -----
     const reloadBtn = document.getElementById('reload-btn');
     if (reloadBtn) reloadBtn.addEventListener('click', reloadBalance);
 }
