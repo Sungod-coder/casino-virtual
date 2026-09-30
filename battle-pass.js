@@ -3,13 +3,9 @@
 
 const BP_MAX_LEVEL = 100;
 const BP_SEASON_DURATION_DAYS = 30;
-// 🗓️ Epoch : début de la Saison 1 = 25/09/2026 à 00:00 UTC
 const BP_SEASON_EPOCH = new Date('2026-09-25T00:00:00Z').getTime();
 const BP_SEASON_DURATION_MS = BP_SEASON_DURATION_DAYS * 24 * 60 * 60 * 1000;
 
-// ============================================
-//   SYSTÈME DE SAISONS
-// ============================================
 function bpGetCurrentSeasonNumber() {
     const elapsed = Date.now() - BP_SEASON_EPOCH;
     if (elapsed < 0) return 1;
@@ -34,9 +30,6 @@ function bpGetSeasonLabel() {
     return `SAISON ${bpGetCurrentSeasonNumber()}`;
 }
 
-// ============================================
-//   XP PAR PALIER
-// ============================================
 function getXPForLevel(level) {
     if (level >= 100) return 0;
     if (level < 10)   return 300;
@@ -59,38 +52,25 @@ const BP_XP_THRESHOLDS = (function() {
     return arr;
 })();
 
-// ============================================
-//   RÉCOMPENSES
-// ============================================
 const BP_REWARDS = (function() {
     const rewards = [];
     const FREE_TICKET_LEVELS    = [15, 30, 45, 60, 75];
     const PREMIUM_TICKET_LEVELS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
     const freeTemplates = [
-        { type: 'tokens', amount: 25 },
-        { type: 'tokens', amount: 50 },
-        { type: 'tokens', amount: 100 },
-        { type: 'potion-x2', amount: 1 },
-        { type: 'tokens', amount: 200 },
-        { type: 'tokens', amount: 150 },
-        { type: 'potion-x2', amount: 1 },
-        { type: 'tokens', amount: 300 },
-        { type: 'tokens', amount: 250 },
-        { type: 'tokens', amount: 400 }
+        { type: 'tokens', amount: 25 }, { type: 'tokens', amount: 50 },
+        { type: 'tokens', amount: 100 }, { type: 'potion-x2', amount: 1 },
+        { type: 'tokens', amount: 200 }, { type: 'tokens', amount: 150 },
+        { type: 'potion-x2', amount: 1 }, { type: 'tokens', amount: 300 },
+        { type: 'tokens', amount: 250 }, { type: 'tokens', amount: 400 }
     ];
 
     const premiumTemplates = [
-        { type: 'tokens', amount: 100 },
-        { type: 'potion-x2', amount: 2 },
-        { type: 'tokens', amount: 250 },
-        { type: 'tokens', amount: 500 },
-        { type: 'potion-x2', amount: 3 },
-        { type: 'tokens', amount: 1000 },
-        { type: 'tokens', amount: 750 },
-        { type: 'tokens', amount: 500 },
-        { type: 'potion-x2', amount: 3 },
-        { type: 'tokens', amount: 1500 }
+        { type: 'tokens', amount: 100 }, { type: 'potion-x2', amount: 2 },
+        { type: 'tokens', amount: 250 }, { type: 'tokens', amount: 500 },
+        { type: 'potion-x2', amount: 3 }, { type: 'tokens', amount: 1000 },
+        { type: 'tokens', amount: 750 }, { type: 'tokens', amount: 500 },
+        { type: 'potion-x2', amount: 3 }, { type: 'tokens', amount: 1500 }
     ];
 
     for (let level = 1; level <= BP_MAX_LEVEL; level++) {
@@ -129,14 +109,10 @@ const BP_REWARDS = (function() {
     return rewards;
 })();
 
-// ============================================
-//   UTILS
-// ============================================
 function bpGetUsers() { return JSON.parse(localStorage.getItem('casino_users')) || {}; }
 function bpSaveUsers(users) { localStorage.setItem('casino_users', JSON.stringify(users)); }
 function bpGetEmail() { return localStorage.getItem('casino_logged_email'); }
 
-// ✅ Vérifie et applique le reset de saison SI NÉCESSAIRE
 function bpCheckAndApplySeasonReset(u) {
     if (!u.bp) {
         u.bp = { xp: 0, claimedFree: [], claimedPremium: [], season: bpGetCurrentSeasonNumber() };
@@ -147,7 +123,6 @@ function bpCheckAndApplySeasonReset(u) {
     }
     const currentSeason = bpGetCurrentSeasonNumber();
     if (u.bp.season < currentSeason) {
-        // 🗓️ Nouvelle saison → reset
         u.bp = { xp: 0, claimedFree: [], claimedPremium: [], season: currentSeason };
         return true;
     }
@@ -194,7 +169,6 @@ function bpGetTickets() {
     return users[email].tickets || 0;
 }
 
-// ✅ Force le passage à une nouvelle saison (debug admin)
 function bpForceNewSeason() {
     if (!confirm('⚠️ Forcer le reset de la saison en cours pour TOUS les joueurs ?')) return;
     const users = bpGetUsers();
@@ -208,9 +182,6 @@ function bpForceNewSeason() {
     if (typeof renderBattlePass === 'function') renderBattlePass();
 }
 
-// ============================================
-//   XP (Pass + Rang)
-// ============================================
 function addBattlePassXP(amount) {
     if (amount <= 0) return;
     const email = bpGetEmail();
@@ -268,9 +239,6 @@ function showLevelUpPopup(level) {
     }, 3000);
 }
 
-// ============================================
-//   RÉCLAMATION
-// ============================================
 function bpClaimReward(level, type) {
     const email = bpGetEmail();
     if (!email) return { ok: false, msg: 'Non connecté' };
@@ -320,9 +288,6 @@ function bpClaimReward(level, type) {
     return { ok: true, msg: 'Récompense reçue !' };
 }
 
-// ============================================
-//   TOUT RÉCLAMER
-// ============================================
 function bpGetAvailableRewards() {
     const data = bpGetData();
     if (!data) return { free: [], premium: [] };
@@ -451,9 +416,6 @@ function bpClaimAllRewards() {
     }
 }
 
-// ============================================
-//   TICKETS
-// ============================================
 function bpUseTicket() {
     const email = bpGetEmail();
     if (!email) return false;
@@ -470,10 +432,12 @@ function bpUseTicket() {
 
 function bpGetTicketsCount() { return bpGetTickets(); }
 
+// ✅ FIX : respecte le data-game-disabled posé par les jeux
 function bpUpdateTicketButtons() {
     const tickets = bpGetTicketsCount();
     document.querySelectorAll('.ticket-btn').forEach(btn => {
-        btn.disabled = tickets < 1;
+        const gameDisabled = btn.getAttribute('data-game-disabled') === 'true';
+        btn.disabled = (tickets < 1) || gameDisabled;
         const countSpan = btn.querySelector('.ticket-count');
         if (countSpan) countSpan.textContent = tickets;
     });
