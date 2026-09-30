@@ -101,6 +101,19 @@ function setupEventListeners() {
     const ticketBtn = document.getElementById('ticket-btn');
     if (ticketBtn) ticketBtn.addEventListener('click', () => {
         if (isRolling || currentBet === 0) return;
+
+        // 🎫 PLAFONNER la mise au solde
+        const balance = getBalance();
+        if (balance <= 0) {
+            showMessage("❌ Tu n'as pas de solde pour miser !");
+            return;
+        }
+        if (currentBet > balance) {
+            currentBet = balance;
+            updateUI();
+            showMessage(`🎫 Mise plafonnée à ${balance} (ton solde)`);
+        }
+
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
             showMessage("❌ Aucun ticket disponible !");
             return;
