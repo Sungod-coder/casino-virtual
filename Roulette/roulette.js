@@ -116,6 +116,12 @@ function updateUI() {
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) spinBtn.disabled = isSpinning || currentBet.amount === 0 || inStreak || currentBet.amount > currentBalance || !currentBet.color;
 
+    // 🎫 Désactive le bouton TICKET si la mise dépasse le solde
+    const ticketBtnUI = document.getElementById('ticket-btn');
+    if (ticketBtnUI) {
+        ticketBtnUI.disabled = isSpinning || inStreak || currentBet.amount === 0 || currentBet.amount > currentBalance || !currentBet.color;
+    }
+
     const reloadBtn = document.getElementById('reload-btn');
     if (reloadBtn) {
         if (currentBalance === 0 && currentBet.amount === 0 && !inStreak && !isSpinning) {
@@ -241,16 +247,15 @@ function setupEventListeners() {
         if (isSpinning || inStreak) return;
         if (currentBet.amount === 0) { showMessage("❌ Sélectionnez d'abord une couleur et une mise !"); return; }
 
-        // 🎫 PLAFONNER la mise au solde
+        // 🚫 BLOQUER si la mise dépasse le solde
         const balance = getBalance();
+        if (currentBet.amount > balance) {
+            showMessage(`❌ Mise (${currentBet.amount}) supérieure à ton solde (${balance}) !`);
+            return;
+        }
         if (balance <= 0) {
             showMessage("❌ Tu n'as pas de solde pour miser !");
             return;
-        }
-        if (currentBet.amount > balance) {
-            currentBet.amount = balance;
-            updateUI();
-            showMessage(`🎫 Mise plafonnée à ${balance} (ton solde)`);
         }
 
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
