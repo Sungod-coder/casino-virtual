@@ -1,23 +1,19 @@
-// db.js — sync Firestore ↔ localStorage
-// Règle d'or : une page n'écrit dans le cloud QUE si elle a réellement modifié des données
-// (drapeau "dirty"). Une page qui n'a rien joué ne peut donc jamais écraser le solde d'un autre appareil.
+// db.js — sync Firestore ↔ localStorage (Version Mobile Ultra-Corrigée)
 
 let __dbCurrentUser = null;
 let __dbSyncReady = false;
 let __dbSaveInFlight = false;
-let __dbModSeq = 0;          // compteur de modifications locales
+let __dbModSeq = 0;          
 let __dbUnsub = null;
 let __dbStartPromise = null;
 let __dbApplying = false;
 
 const __rawSet = localStorage.setItem.bind(localStorage);
-const DIRTY_KEY = 'casino_dirty_v2';   // "1" = modifs locales pas encore confirmées par Firestore
+const DIRTY_KEY = 'casino_dirty_v2';   
 
 function isDirty() { return localStorage.getItem(DIRTY_KEY) === '1'; }
 function dbIsReady() { return __dbSyncReady && __dbCurrentUser !== null; }
 
-// Les écritures sont mises en file (IndexedDB) : si la page est quittée avant la fin
-// de l'envoi (fréquent sur mobile), elles partent au prochain chargement.
 try {
     if (typeof fbDb !== 'undefined' && fbDb && fbDb.enablePersistence) {
         fbDb.enablePersistence({ synchronizeTabs: true }).catch(() => {});
@@ -43,7 +39,7 @@ function dbRefreshAllUI() {
 }
 
 // ============================================
-//   Firestore → localStorage (sans déclencher de sauvegarde)
+//   Firestore → localStorage
 // ============================================
 function dbApplyRemote(data) {
     const email = data.email;
@@ -69,7 +65,7 @@ function dbApplyRemote(data) {
     return before !== after;
 }
 
-async function dbFetchRemote(uid) {         // 'ok' | 'missing' | 'error'
+async function dbFetchRemote(uid) {         
     try {
         const doc = await fbDb.collection('users').doc(uid).get();
         if (!doc.exists) return 'missing';
@@ -96,7 +92,7 @@ function withTimeout(p, ms) {
 
 async function dbSaveUserToCloud() {
     if (!__dbCurrentUser || !fbDb || !isDirty()) return;
-    if (__dbSaveInFlight) return;              // la boucle ci-dessous renverra les modifs arrivées entre-temps
+    if (__dbSaveInFlight) return;              
     __dbSaveInFlight = true;
     try {
         let seq;
@@ -119,11 +115,11 @@ async function dbSaveUserToCloud() {
                 }, { merge: true }),
                 8000
             );
-            if (seq === __dbModSeq) {           // rien n'a bougé pendant l'envoi → tout est à jour
+            if (seq === __dbModSeq) {           
                 localStorage.removeItem(DIRTY_KEY);
                 console.log('☁️ ✅ SAVED — balance:', u.balance);
             }
-        } while (seq !== __dbModSeq);           // modifs arrivées pendant l'envoi → on renvoie
+        } while (seq !== __dbModSeq);           
     } catch (e) {
         console.error('❌ Save ÉCHEC (sera réessayé):', e && e.message);
     } finally {
@@ -139,28 +135,33 @@ localStorage.setItem = function (key, value) {
     if ((key === 'casino_users' || key === 'casinoBalance') && !__dbApplying && __dbSyncReady) {
         __dbModSeq++;
         __rawSet(DIRTY_KEY, '1');
+        // Sauvegarde immédiate sans attendre sur mobile
         dbSaveUserToCloud();
     }
 };
 
-// Retry si un envoi a échoué
-setInterval(() => { if (__dbCurrentUser && __dbSyncReady && isDirty() && !__dbSaveInFlight) dbSaveUserToCloud(); }, 3000);
+// Retry régulier pour s'assurer que le mobile pousse ses scores
+setInterval(() => { if (__dbCurrentUser && __dbSyncReady && isDirty() && !__dbSaveInFlight) dbSaveUserToCloud(); }, 2000);
 
-// Quitter / masquer la page : on n'envoie QUE s'il y a du non-envoyé (plus d'écrasement par un onglet périmé)
-function forceSave() { if (__dbCurrentUser && isDirty()) dbSaveUserToCloud(); }
+// Gestion mobile robuste pour forcer l'envoi instantané lors du masquage/quittage
+function forceSave() { 
+    if (__dbCurrentUser && isDirty()) {
+        dbSaveUserToCloud();
+    } 
+}
+
 window.addEventListener('pagehide', forceSave);
 window.addEventListener('beforeunload', forceSave);
 
-// Revenir sur la page : si on n'a rien de non-envoyé, on relit le serveur (onglet/téléphone périmé)
-async function dbPullIfClean() {
-    if (!__dbCurrentUser || !__dbSyncReady || isDirty() || __dbSaveInFlight) return;
-    try {
-        const doc = await fbDb.collection('users').doc(__dbCurrentUser.uid).get({ source: 'server' });
-        if (doc.exists && !isDirty() && !__dbSaveInFlight && dbApplyRemote(doc.data())) dbRefreshAllUI();
-    } catch (e) {}
-}
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') forceSave(); else dbPullIfClean();
+    if (document.visibilityState === 'hidden') {
+        forceSave();
+    } else {
+        // Au retour sur la page mobile, on force une synchro propre avec le serveur
+        if (__dbCurrentUser && __dbSyncReady && !isDirty()) {
+            dbFetchRemote(__dbCurrentUser.uid).then(() => dbRefreshAllUI());
+        }
+    }
 });
 
 // ============================================
@@ -173,22 +174,23 @@ function dbStartSync(user) {
     console.log('🔄 Sync START pour :', user.email);
 
     __dbStartPromise = (async () => {
-        localStorage.removeItem('casino_pending_save');   // ancien drapeau, remplacé par DIRTY_KEY
+        localStorage.removeItem('casino_pending_save');   
 
         const users = JSON.parse(localStorage.getItem('casino_users')) || {};
         const localUser = users[user.email];
         const hasLocal = localUser && typeof localUser.balance === 'number'
                       && localStorage.getItem('casino_logged_email') === user.email;
 
+        // Sur mobile, si des modifs locales n'ont pas été envoyées, on les priorise et on les pousse direct
         if (isDirty() && hasLocal) {
-            console.log('🛡️ Modifs locales non envoyées → on garde le local et on push');
+            console.log('🛡️ Modifs locales mobile non envoyées → push immédiat');
             __dbSyncReady = true;
             dbRefreshAllUI();
             await dbSaveUserToCloud();
         } else {
             localStorage.removeItem(DIRTY_KEY);
             const r = await dbFetchRemote(user.uid);
-            if (r === 'missing' && hasLocal) {              // vrai nouveau compte : on crée le doc
+            if (r === 'missing' && hasLocal) {              
                 __rawSet(DIRTY_KEY, '1');
                 __dbSyncReady = true;
                 await dbSaveUserToCloud();
@@ -197,7 +199,7 @@ function dbStartSync(user) {
             dbRefreshAllUI();
         }
 
-        // Écoute temps réel : les autres appareils mettent à jour celui-ci
+        // Écoute temps réel
         if (__dbUnsub) __dbUnsub();
         __dbUnsub = fbDb.collection('users').doc(user.uid).onSnapshot((doc) => {
             if (!doc.exists || doc.metadata.hasPendingWrites || doc.metadata.fromCache) return;
