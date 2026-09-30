@@ -60,14 +60,8 @@ function stopSpinSound() {
                 spinSound.volume = 0.6;
             }
         }, 30);
-
         setTimeout(() => {
-            try {
-                clearInterval(fade);
-                spinSound.pause();
-                spinSound.currentTime = 0;
-                spinSound.volume = 0.6;
-            } catch (e) {}
+            try { clearInterval(fade); spinSound.pause(); spinSound.currentTime = 0; spinSound.volume = 0.6; } catch (e) {}
         }, 500);
     } catch (e) {}
 }
@@ -119,7 +113,9 @@ function updateUI() {
     // 🎫 Désactive le bouton TICKET si la mise dépasse le solde
     const ticketBtnUI = document.getElementById('ticket-btn');
     if (ticketBtnUI) {
-        ticketBtnUI.disabled = isSpinning || inStreak || currentBet.amount === 0 || currentBet.amount > currentBalance || !currentBet.color;
+        const gameDisabled = isSpinning || inStreak || currentBet.amount === 0 || currentBet.amount > currentBalance || !currentBet.color;
+        ticketBtnUI.disabled = gameDisabled;
+        ticketBtnUI.setAttribute('data-game-disabled', gameDisabled ? 'true' : 'false');
     }
 
     const reloadBtn = document.getElementById('reload-btn');
@@ -175,10 +171,7 @@ function setupEventListeners() {
             currentChipValue = parseInt(e.target.dataset.value, 10);
 
             const customInput = document.getElementById('custom-bet-input');
-            if (customInput) {
-                customInput.value = '';
-                customInput.classList.remove('active');
-            }
+            if (customInput) { customInput.value = ''; customInput.classList.remove('active'); }
 
             if (currentBet.color) {
                 currentBet.amount = currentChipValue;
@@ -200,7 +193,6 @@ function setupEventListeners() {
             const val = parseInt(customInput.value, 10);
             if (isNaN(val) || val < 1) return;
             currentChipValue = val;
-
             if (currentBet.color) {
                 currentBet.amount = val;
                 const labels = { red: 'ROUGE', black: 'NOIR', green: 'VERT' };
@@ -224,7 +216,6 @@ function setupEventListeners() {
             if (isSpinning || inStreak) return;
             const color = spot.dataset.color;
             const labels = { red: 'ROUGE', black: 'NOIR', green: 'VERT' };
-
             if (currentBet.color === color) {
                 currentBet.amount += currentChipValue;
             } else {
@@ -247,16 +238,12 @@ function setupEventListeners() {
         if (isSpinning || inStreak) return;
         if (currentBet.amount === 0) { showMessage("❌ Sélectionnez d'abord une couleur et une mise !"); return; }
 
-        // 🚫 BLOQUER si la mise dépasse le solde
         const balance = getBalance();
         if (currentBet.amount > balance) {
             showMessage(`❌ Mise (${currentBet.amount}) supérieure à ton solde (${balance}) !`);
             return;
         }
-        if (balance <= 0) {
-            showMessage("❌ Tu n'as pas de solde pour miser !");
-            return;
-        }
+        if (balance <= 0) { showMessage("❌ Tu n'as pas de solde pour miser !"); return; }
 
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
             showMessage("❌ Aucun ticket disponible !");
@@ -294,10 +281,7 @@ function clearBet() {
     if (isSpinning || inStreak) return;
     currentBet = { color: null, amount: 0 };
     const customInput = document.getElementById('custom-bet-input');
-    if (customInput) {
-        customInput.value = '';
-        customInput.classList.remove('active');
-    }
+    if (customInput) { customInput.value = ''; customInput.classList.remove('active'); }
     showMessage("Mise effacée.");
     updateUI();
 }
@@ -484,9 +468,7 @@ function cashout() {
     streakCount = 0;
     streakColor = null;
     updateUI();
-    if (typeof playCashRegister === 'function') {
-        try { playCashRegister(); } catch (e) {}
-    }
+    if (typeof playCashRegister === 'function') { try { playCashRegister(); } catch (e) {} }
 }
 
 function addHistory(color) {
