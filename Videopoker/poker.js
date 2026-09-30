@@ -191,6 +191,19 @@ function setupEventListeners() {
     const ticketBtn = document.getElementById('ticket-btn');
     if (ticketBtn) ticketBtn.addEventListener('click', () => {
         if (gameState !== 'betting' || currentBet === 0) return;
+
+        // 🎫 PLAFONNER la mise au solde
+        const balance = getBalance();
+        if (balance <= 0) {
+            showMessage("❌ Tu n'as pas de solde pour miser !");
+            return;
+        }
+        if (currentBet > balance) {
+            currentBet = balance;
+            updateUI();
+            showMessage(`🎫 Mise plafonnée à ${balance} (ton solde)`);
+        }
+
         if (typeof bpUseTicket !== 'function' || !bpUseTicket()) {
             showMessage("❌ Aucun ticket disponible !");
             return;
@@ -237,7 +250,6 @@ function dealCards() {
     updateStatus("Cliquez sur les cartes à GARDER, puis ÉCHANGER.");
     showMessage("🎴 Cliquez sur les cartes à GARDER.");
 
-    // 🎵 Son de carte pour les 5 cartes distribuées (décalées)
     for (let i = 0; i < 5; i++) {
         setTimeout(() => {
             if (typeof window.playCardSound === 'function') window.playCardSound();
@@ -258,7 +270,6 @@ function drawNewCards() {
 
     renderHand();
 
-    // 🎵 Son de carte pour chaque carte remplacée (décalées)
     for (let i = 0; i < replacedCount; i++) {
         setTimeout(() => {
             if (typeof window.playCardSound === 'function') window.playCardSound();
